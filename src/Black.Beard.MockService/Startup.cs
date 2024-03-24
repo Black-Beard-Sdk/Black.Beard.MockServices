@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Bb.Servers.Web.Models;
+using Bb.Servers.Web;
 
 namespace Bb.MockService
 {
@@ -10,7 +11,7 @@ namespace Bb.MockService
     /// <summary>
     /// Startup class par parameter
     /// </summary>
-    public class Startup : Bb.Servers.Web.StartupBase
+    public class Startup : ServiceRunnerStartup
     {
 
 
@@ -30,12 +31,12 @@ namespace Bb.MockService
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                GlobalConfiguration.CurrentDirectoryToWriteGenerators = "c:\\".Combine("tmp", "parrot", "contracts");
+                GlobalConfiguration.CurrentDirectoryToWriteGenerators = "c:\\".Combine("tmp", "mocks", "contracts");
                 GlobalConfiguration.DirectoryToTrace = "c:\\".Combine("tmp", "parrot", "logs");
             }
             else
             {
-                GlobalConfiguration.CurrentDirectoryToWriteGenerators = "tmp".Combine("parrot", "contracts");
+                GlobalConfiguration.CurrentDirectoryToWriteGenerators = "tmp".Combine("mocks", "contracts");
                 GlobalConfiguration.DirectoryToTrace = "tmp".Combine("parrot", "logs");
             }
 

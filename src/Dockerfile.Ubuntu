@@ -21,7 +21,7 @@ COPY --from=build /app .
 ENV use_swagger=true
 ENV trace_all=true
 ENV use_telemetry=true
-ENV user-controller=true
+ENV user-controllers=true
 EXPOSE 80
 
 ENTRYPOINT ["dotnet", "Black.Beard.MockService.dll"]

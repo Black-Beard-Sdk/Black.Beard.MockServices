@@ -255,6 +255,3 @@ namespace Bb.ParrotServices.Controllers
 
 
 }
-
-
-// dotnet.exe build "/app/tmp/parrot/projects/parcel/mock/service/mock.csproj

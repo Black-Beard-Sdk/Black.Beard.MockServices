@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Bb.MockService
 {
 
-    internal class Program
+    public class Program
     {
 
         /// <summary>
@@ -17,7 +17,7 @@ namespace Bb.MockService
             service.Run();
         }
 
-        public static ServiceRunnerBase GetService(string[] args)
+        public static ServiceRunner<Startup> GetService(string[] args)
         {
               
             var currentAssembly = Assembly.GetEntryAssembly();
