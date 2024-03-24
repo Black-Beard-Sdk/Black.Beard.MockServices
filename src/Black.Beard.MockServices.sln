@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build.docker", "build.docker", "{9F0821F8-0106-4C19-9FD0-E010F8DBCACA}"
+	ProjectSection(SolutionItems) = preProject
+		..\appveyor.yml = ..\appveyor.yml
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+		..\.appveyor\test.ps1 = ..\.appveyor\test.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dockers", "dockers", "{E864EAD9-A689-4647-9F9D-A02627187A74}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile.Ubuntu = Dockerfile.Ubuntu
+		Dockerfile.Windows = Dockerfile.Windows
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".appveyor", ".appveyor", "{9D77DE9E-D790-43E9-A176-B37B81994A9E}"
+	ProjectSection(SolutionItems) = preProject
+		..\.appveyor\build.ps1 = ..\.appveyor\build.ps1
+		..\.appveyor\deploy.ps1 = ..\.appveyor\deploy.ps1
+		..\.appveyor\help.txt = ..\.appveyor\help.txt
+		..\.appveyor\test.ps1 = ..\.appveyor\test.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{01E9F556-7EEF-4E19-9141-B87B362032E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Black.Beard.MockService", "Black.Beard.MockService\Black.Beard.MockService.csproj", "{9FD876C0-983F-4943-934D-8A9B3DC33C8F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9FD876C0-983F-4943-934D-8A9B3DC33C8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD876C0-983F-4943-934D-8A9B3DC33C8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD876C0-983F-4943-934D-8A9B3DC33C8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD876C0-983F-4943-934D-8A9B3DC33C8F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9D77DE9E-D790-43E9-A176-B37B81994A9E} = {9F0821F8-0106-4C19-9FD0-E010F8DBCACA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DFE72D88-A39D-4255-B2A3-457F46614593}
+	EndGlobalSection
+EndGlobal
