@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop';
 
 Write-Host Starting build $taggedimage;
 
-Set-Location .\Src
+Set-Location .\src
 
 Write-Host setting working directory to $pwd;
 

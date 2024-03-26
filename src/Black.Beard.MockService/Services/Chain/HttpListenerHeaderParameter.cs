@@ -11,7 +11,7 @@
         public override async Task InvokeAsync(HttpListenerContext context)
         {
             
-            Stop();
+            //Stop();
 
             if (context.Context.Request.Headers.TryGetValue(this.Name, out var value))
                 context.AddArgument(this.Name, value);

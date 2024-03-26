@@ -16,7 +16,7 @@ namespace Bb.Services.Chain
         public override async Task InvokeAsync(HttpListenerContext context)
         {
 
-            Stop();
+            //Stop();
 
             NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(context.Context.Request.QueryString.ToString());
 

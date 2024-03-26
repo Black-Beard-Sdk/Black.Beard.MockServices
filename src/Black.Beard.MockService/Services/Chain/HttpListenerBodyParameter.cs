@@ -17,14 +17,14 @@ namespace Bb.Services.Chain
 
         public override async Task InvokeAsync(HttpListenerContext context)
         {
-
             //var txt = await context.Context.Request.Read();
             // var txt = await context.Context.Request.BodyReader.ReadAsync();
-                       
+            //var ruleSet = new ValidationRuleSet();
+            //_schema.Validate();
+            await Task.Yield();
 
-            var ruleSet = new ValidationRuleSet();
-            _schema.Validate(ruleSet);
             return;
+
         }
 
         private readonly IDictionary<string, OpenApiMediaType> Contents;

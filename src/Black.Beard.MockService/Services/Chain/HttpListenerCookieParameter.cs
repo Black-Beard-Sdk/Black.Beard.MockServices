@@ -11,7 +11,7 @@
         public override async Task InvokeAsync(HttpListenerContext context)
         {
 
-            Stop();
+            //Stop();
 
             if (context.Context.Request.Cookies.TryGetValue(this.Name, out string value))
                 context.AddArgument(this.Name, value);
