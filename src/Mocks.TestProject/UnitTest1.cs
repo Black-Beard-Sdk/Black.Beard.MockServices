@@ -1,7 +1,6 @@
 using Bb.Curls;
-using Bb;
-using Bb.Servers.Web;
 using Bb.MockService;
+
 
 namespace Mocks.TestProject
 {
@@ -20,33 +19,60 @@ namespace Mocks.TestProject
 
         }
 
-
         [TestMethod]
-        public void TestMethod1()
+        public void UploadMethod2()
         {
-                                    
-            int port = 5000;
-            using (var service = Bb.MockService.Program.GetService(new string[] { })
-                .AddLocalhostUrlWithDynamicPort("http", null, ref port)) //.AddLocalhostUrlWithDynamicPort("https", ref port) // Créer un certificat pour utilisation
-            {
-                
-                var t1 = service.RunAsync();
-                port = ResolvePort(service);
 
-                CurlInterpreter cmd = $"curl -X GET \"http://localhost:{port}/proxy/parcel/ParcelTracking/11111\" -H \"accept: application/json\"";
+            string host = null; // "localhost";
+            int port = 5000;
+            using (var service = Program.GetService(new string[] { })
+                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
+                .StartService(out var task))
+            {
+
+                CurlInterpreter cmd = $"curl -X 'POST' 'http://localhost:{port}/Mock/Test' -H 'accept: */*' -H 'Content-Type: application/json' -d '\"string\"'";
                 var a = cmd.ResultToJson().ToString();
 
             }
 
         }
 
-
-        private static int ResolvePort(ServiceRunner<Startup> service)
+        [TestMethod]
+        public void UploadMethod1()
         {
-            var uri = service.Addresses.First(c => c.Scheme == "http" && c.Host == "127.0.0.1");
-            return uri.Port;
+
+            string host = null; // "localhost";
+            int port = 5000;
+            using (var service = Program.GetService(new string[] { })
+                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
+                .StartService(out var task))
+            {
+
+                CurlInterpreter cmd = $"curl -X 'POST' 'http://localhost:{port}/Mock/parcel/upload' -H 'accept: */*' -H 'Content-Type: multipart/form-data' -F 'upfile=@C:\\Users\\g.beard\\Desktop\\Test curl\\swagger.json;type=application/json'";
+                var a = cmd.ResultToJson().ToString();
+
+            }
+
         }
 
+        [TestMethod]
+        public void TestMethod1()
+        {
+
+            string host = "localhost";
+            int port = 5000;
+            using (var service = Program.GetService(new string[] { })
+            .AddLocalhostUrlWithDynamicPort("http", host, ref port)
+                .StartService(out var task))
+            {
+
+                CurlInterpreter cmd = $"curl -X GET \"http://localhost:{port}/proxy/parcel/ParcelTracking/11111\" -H \"accept: application/json\"";
+                var a = cmd.ResultToString();
+
+            }
+
+        }
 
     }
+
 }

@@ -10,9 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Black.Beard.Helpers" Version="2.0.31" />
-    <PackageReference Include="Black.Beard.Http" Version="1.0.16" />
-    <PackageReference Include="Black.Beard.Web.Server" Version="1.0.9" />
+    <PackageReference Include="Black.Beard.Helpers" Version="2.0.32" />
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

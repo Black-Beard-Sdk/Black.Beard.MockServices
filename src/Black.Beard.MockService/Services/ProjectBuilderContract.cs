@@ -41,8 +41,24 @@ namespace Bb.Services
         /// <returns></returns>
         public bool TemplateExistsOnDisk(string templateName)
         {
-            return Directory.Exists(Root.Combine(templateName));
+            return Directory.Exists(Root.Combine("Templates", templateName + ".json"));
         }
+
+        /// <summary>
+        /// return the list of template on the disk
+        /// </summary>
+        /// <param name="templateName">Name of the template.</param>
+        /// <returns></returns>
+        public IEnumerable<FileInfo> Templates()
+        {
+            return Root.Combine("Templates").AsDirectory().GetFiles("*.json").ToArray();
+        }
+
+        public FileInfo? ResolvePath(string filename)
+        {
+            return Root.Combine("Templates").AsDirectory().GetFiles(filename).FirstOrDefault();
+        }
+
 
         /// <summary>
         /// Writes the document on disk.
@@ -50,11 +66,19 @@ namespace Bb.Services
         /// <param name="upFile">The uploaded file.</param>
         public ProjectBuilderContract WriteOnDisk(IFormFile upFile)
         {
+            
             var target = Root.Combine("model" + Path.GetExtension(upFile.FileName))
                 .AsFile();
+
             var file = upFile.Save(target, true);
             _templateFilename = file.FullName;
+
+            var dir = Root.Combine("Templates").AsDirectory();
+            if (dir.Exists)
+                dir.Delete(true);
+
             return this;
+
         }
 
         /// <summary>

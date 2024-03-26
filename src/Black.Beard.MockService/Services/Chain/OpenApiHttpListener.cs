@@ -24,7 +24,6 @@ namespace Bb.Services.Chain
             return self.Paths.Accept(this);
         }
 
-
         public override HttpListenerBase? VisitPaths(OpenApiPaths self)
         {
 
@@ -74,49 +73,30 @@ namespace Bb.Services.Chain
             }
 
             var templateFilename = Context.GetDataFor(self).GetData<string>("templateName");
-            //if (!string.IsNullOrEmpty(templateFilename))
-            //    templateFilename = Context.GetRelativePath(templateFilename);
 
             var path = this.Contexts[1];
             var method = (OperationType)Enum.Parse(typeof(OperationType), this.Contexts[0]);
             switch (method)
             {
+
                 case OperationType.Get:
-                    result.SetNext(new HttpListenerGetMethod(path, templateFilename));
-                    break;
-
                 case OperationType.Put:
-                    Stop();
-                    break;
-
                 case OperationType.Post:
-                    result.SetNext(new HttpListenerPostMethod(path, templateFilename));
-                    break;
-
                 case OperationType.Delete:
-                    Stop();
-                    break;
-
                 case OperationType.Options:
-                    Stop();
-                    break;
-
                 case OperationType.Head:
-                    Stop();
-                    break;
-
                 case OperationType.Patch:
-                    Stop();
-                    break;
-
                 case OperationType.Trace:
-                    Stop();
+                    result.SetNext(new HttpListenerMethod(method, path, templateFilename));
                     break;
 
                 default:
                     Stop();
                     break;
             }
+
+
+            result.SetNext(new HttpListenerMethod(method, path, templateFilename));
 
             return result;
 

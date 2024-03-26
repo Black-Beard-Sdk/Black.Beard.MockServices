@@ -19,39 +19,31 @@ namespace Bb.MockService
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public Startup(IConfiguration configuration) 
+        public Startup(IConfiguration configuration)
             : base(configuration)
         {
-      
+
         }
 
 
         public override void ConfigureServices(IServiceCollection services)
         {
 
+            string root = string.Empty;
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                GlobalConfiguration.CurrentDirectoryToWriteGenerators = "c:\\".Combine("tmp", "mocks", "contracts");
-                GlobalConfiguration.DirectoryToTrace = "c:\\".Combine("tmp", "parrot", "logs");
-            }
+                root = "c:\\".Combine("tmp", "mocks");
+
             else
-            {
-                GlobalConfiguration.CurrentDirectoryToWriteGenerators = "tmp".Combine("mocks", "contracts");
-                GlobalConfiguration.DirectoryToTrace = "tmp".Combine("parrot", "logs");
-            }
+                root = "tmp".Combine("mocks");
 
+            GlobalConfiguration.CurrentDirectoryToWriteGenerators = root.Combine("contracts");
+            GlobalConfiguration.DirectoryToTrace = root.Combine("logs");
 
-            if (!Directory.Exists(GlobalConfiguration.CurrentDirectoryToWriteGenerators))
-                Directory.CreateDirectory(GlobalConfiguration.CurrentDirectoryToWriteGenerators);
+            GlobalConfiguration.CurrentDirectoryToWriteGenerators.CreateFolderIfNotExists();
+            GlobalConfiguration.DirectoryToTrace.CreateFolderIfNotExists();
 
-            if (!Directory.Exists(GlobalConfiguration.DirectoryToTrace))
-                Directory.CreateDirectory(GlobalConfiguration.DirectoryToTrace);
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                GlobalConfiguration.DirectoryToTrace += "\\";
-
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                GlobalConfiguration.DirectoryToTrace += "/";
+            GlobalConfiguration.DirectoryToTrace += Path.DirectorySeparatorChar;
 
             //Trace.TraceInformation("setting directory to generate projects in : " + Configuration.CurrentDirectoryToWriteProjects);
             Trace.TraceInformation("setting directory to output logs : " + GlobalConfiguration.DirectoryToTrace);
@@ -69,7 +61,7 @@ namespace Bb.MockService
             RegisterServicesPolicies(services);
         }
 
-    
+
         /// <summary>
         /// Configures the specified application.
         /// </summary>
@@ -80,7 +72,7 @@ namespace Bb.MockService
         {
 
             base.ConfigureApplication(app, env, loggerFactory);
-                        
+
             app
                 .UseHttpsRedirection()
                 .UseRouting()

@@ -3,10 +3,10 @@ using Bb.Expressions;
 using Bb.Json.Jslt.Asts;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using System.Globalization;
 using Bb.Extensions;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Expressions;
+using Bb.Http;
 
 namespace Bb.OpenApiServices
 {
@@ -838,7 +838,7 @@ namespace Bb.OpenApiServices
             string name = ResolveName(item.Schema);
             var templateName = $"template_{name}_jslt.json";
 
-            if (item.Kind == @"application/json")
+            if (item.Kind == ContentType.ApplicationJson)
             {
                 var content = item.Schema.Accept(this);
 

@@ -2,7 +2,7 @@
 
 namespace Bb.Services.Chain
 {
-    public abstract class HttpListenerMethod : HttpListenerChain
+    public class HttpListenerMethod : HttpListenerChain
     {
 
         public HttpListenerMethod(OperationType type, string path, string templateFileName) : base()
@@ -11,6 +11,24 @@ namespace Bb.Services.Chain
             this.Path = path.Split('/');
             TemplateFileName = templateFileName;
         }
+
+
+        public override async Task InvokeAsync(HttpListenerContext context)
+        {
+
+            bool withDebug = false;
+
+            var dic = new Dictionary<string, Oldtonsoft.Json.Linq.JToken>();
+            context.Arguments().ToList().ForEach(c => dic.Add(c.Key, Oldtonsoft.Json.Linq.JToken.FromObject(c.Value)));
+
+            var datas = context.GetDatas(this.TemplateFileName, withDebug, dic);
+
+            context.Context.Response.StatusCode = StatusCodes.Status200OK;
+            await context.Context.Response.WriteAsync(datas);
+
+
+        }
+
 
         public OperationType Type { get; }
 
