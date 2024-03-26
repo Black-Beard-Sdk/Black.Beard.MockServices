@@ -40,6 +40,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Generators\Index.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Generators\_index.html">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

@@ -89,7 +89,7 @@ namespace Bb.ParrotServices.Controllers
                                .Generate()
                                ;
 
-            var items = _builder.GetItems();
+            _builder.RegenerateIndex();
 
             if (ctx.Diagnostics.Success)
             {

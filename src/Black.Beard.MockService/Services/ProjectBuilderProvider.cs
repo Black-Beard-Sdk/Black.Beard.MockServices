@@ -2,6 +2,7 @@
 using Bb.ComponentModel.Factories;
 using Bb.Servers.Web.Models;
 using System.Reflection;
+using System.Text;
 
 namespace Bb.Services.Managers
 {
@@ -83,6 +84,29 @@ namespace Bb.Services.Managers
 
         }
 
+
+        public void RegenerateIndex()
+        {
+
+            StringBuilder sb = new StringBuilder();
+
+            var _rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
+            var _index = _rootWww.Combine("Generators", "Index.html").AsFile();
+            foreach (var item in GetItems())
+                sb.AppendLine(item);
+
+            var content = _index.LoadFromFile().Replace("{{items}}", sb.ToString());
+
+            var indexTarget = Root.Combine("index.html").AsFile();
+
+            if (indexTarget.Exists)
+                indexTarget.Delete();
+
+            indexTarget.FullName.Save(content);
+
+
+        }
+
         /// <summary>
         /// Return ths list of html contract index.
         /// </summary>
@@ -95,7 +119,11 @@ namespace Bb.Services.Managers
             {
                 var c = item.GetFiles("index.html").FirstOrDefault();
                 if (c.Exists)
-                    _items.Add(Path.Combine("www", c.FullName.Substring(Root.Length + 1)).Replace("\\", "/"));
+                {
+                    var path = "/" + Path.Combine("www", c.FullName.Substring(Root.Length + 1)).Replace("\\", "/");
+                    var t = $"<div><a href=\"{path}\">{item.Name}</a> </div>";
+                    _items.Add(t);
+                }
             }
             return _items;
         }
