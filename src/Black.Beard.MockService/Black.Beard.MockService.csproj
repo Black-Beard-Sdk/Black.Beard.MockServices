@@ -14,7 +14,7 @@
 		<PackageReference Include="Black.Beard.Helpers.ContentLoaders.Compress" Version="2.0.32" />
 		<PackageReference Include="Black.Beard.Http" Version="1.0.18" />
 		<PackageReference Include="Black.Beard.Jslt" Version="1.0.317" />
-		<PackageReference Include="Black.Beard.OpenApiServices" Version="1.0.9" />
+		<PackageReference Include="Black.Beard.OpenApiServices" Version="1.0.10" />
 		<PackageReference Include="Black.Beard.Process" Version="1.0.112" />
 		<PackageReference Include="Black.Beard.Projects.Models" Version="1.0.112" />
 		<PackageReference Include="Black.Beard.Roslyn" Version="1.0.112" />
@@ -37,6 +37,15 @@
 	  <Content Update="nlog.config">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Generators\_index.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="www\scripts\redoc.standalone.js">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 

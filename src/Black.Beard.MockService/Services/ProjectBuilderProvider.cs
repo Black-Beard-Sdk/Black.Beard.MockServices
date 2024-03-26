@@ -1,6 +1,7 @@
 ﻿using Bb.ComponentModel.Attributes;
 using Bb.ComponentModel.Factories;
 using Bb.Servers.Web.Models;
+using System.Reflection;
 
 namespace Bb.Services.Managers
 {
@@ -36,6 +37,7 @@ namespace Bb.Services.Managers
             // services.GetKeyedService<Option<Configuration>>(Constants.Models.Configuration);
 
             Initialize(GlobalConfiguration.CurrentDirectoryToWriteGenerators);
+        
         }
 
 
@@ -46,6 +48,12 @@ namespace Bb.Services.Managers
         public virtual void Initialize(string pathRoot)
         {
             _root = pathRoot;
+
+            var rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
+            var redoc = rootWww.Combine("www", "scripts", "redoc.standalone.js").AsFile();
+            if (!redoc.Exists)
+            redoc.CopyToDirectory(_root);
+
         }
 
 
@@ -73,6 +81,23 @@ namespace Bb.Services.Managers
 
             return builder;
 
+        }
+
+        /// <summary>
+        /// Return ths list of html contract index.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetItems()
+        {
+            List<string> _items = new List<string>();
+            var r = Root.AsDirectory();
+            foreach (var item in r.GetDirectories())
+            {
+                var c = item.GetFiles("index.html").FirstOrDefault();
+                if (c.Exists)
+                    _items.Add(Path.Combine("www", c.FullName.Substring(Root.Length + 1)).Replace("\\", "/"));
+            }
+            return _items;
         }
 
 
@@ -108,6 +133,7 @@ namespace Bb.Services.Managers
 
 
         #endregion generators
+
 
         /// <summary>
         /// Gets the root path for access to the resource.

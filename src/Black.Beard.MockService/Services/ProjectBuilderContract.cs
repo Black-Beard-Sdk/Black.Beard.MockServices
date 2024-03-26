@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 
 namespace Bb.Services
 {
@@ -32,6 +33,11 @@ namespace Bb.Services
             _logger = parent._logger;
             ContractName = contract;
             Root = parent.Root.Combine(contract);
+
+            _rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
+            _index = _rootWww.Combine("Generators", "_index.html").AsFile();
+            _index.Refresh();
+
         }
 
         /// <summary>
@@ -147,11 +153,31 @@ namespace Bb.Services
             ctx = new ContextGenerator(Root);
 
             new ServiceGeneratorProcess<OpenApiDocument>(ctx)
-            .Append(new OpenApiValidator(), new OpenApiGenerateDataTemplate())
-            .Generate(_document);
+                .Append(new OpenApiValidator())
+                .Generate(_document);
+
+            new ServiceGeneratorProcess<OpenApiDocument>(ctx)
+                .Append(new OpenApiGenerateDataTemplate())
+                .Generate(_document);
 
             var generator = new OpenApiHttpListener();
             generator.Parse(_document, ctx);
+
+
+            if (_index.Exists)
+            {
+                var content = _index.LoadFromFile()
+                    .Replace("{{path}}", @".\" + Path.GetFileName(_templateFilename))
+                    
+                    ;
+                var indexTarget = Root.Combine("index.html").AsFile();
+
+                if (indexTarget.Exists)
+                    indexTarget.Delete();
+
+                indexTarget.FullName.Save(content);
+            }
+
 
             return generator.Result;
 
@@ -178,6 +204,8 @@ namespace Bb.Services
         /// The path root
         /// </summary>
         public readonly string Root;
+        private readonly DirectoryInfo? _rootWww;
+        private readonly FileInfo _index;
 
         /// <summary>
         /// Gets the parent that create the current class.

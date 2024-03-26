@@ -29,7 +29,7 @@ namespace Bb.ParrotServices.Controllers
             _logger = logger;
         }
 
-        
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         //[Consumes("application/text")]
@@ -84,28 +84,26 @@ namespace Bb.ParrotServices.Controllers
             }
 
 
-
             var _contract = _builder.Contract(contract, true);
             var ctx = _contract.WriteOnDisk(upfile)
                                .Generate()
                                ;
 
-
+            var items = _builder.GetItems();
 
             if (ctx.Diagnostics.Success)
             {
                 _logger.LogInformation($"{contract} has been generated");
                 var templates = _contract.Templates().Select(c => c.Name).ToList();
-                return Ok(templates);
+                return Ok(GetModel(ctx.Diagnostics, templates));
             }
             else
             {
                 _logger.LogInformation($"{contract} has been failed");
-                return BadRequest(GetModel(ctx.Diagnostics));
+                return BadRequest(GetModel(ctx.Diagnostics, null));
             }
 
         }
-
 
         /// <summary>
         /// Download the specified data template.
@@ -179,25 +177,17 @@ namespace Bb.ParrotServices.Controllers
 
 
 
-        private ModelStateDictionary GetModel(ScriptDiagnostics diagnostics)
+        private ContractModel GetModel(ScriptDiagnostics diagnostics, IEnumerable<string> templates)
         {
 
-            var model = new ModelStateDictionary();
+            var model = new ContractModel();
 
             foreach (var diagnostic in diagnostics)
-            {
+                model.Diagnostic.Add(diagnostic.ToString());
 
-                string message;
-
-                //if (diagnostic.Location.Start.IsEmpty)
-                //{
-                //}
-                //else
-                //    //message += diagnostic.Location.Start.;
-
-                model.AddModelError(diagnostic.Severity + (model.Count + 1).ToString(), diagnostic.ToString());
-
-            }
+            if (templates != null)
+                foreach (var template in templates)
+                    model.Templates.Add(template);
 
             return model;
 
@@ -206,6 +196,22 @@ namespace Bb.ParrotServices.Controllers
         internal readonly ProjectBuilderProvider _builder;
         private readonly ILogger<MockController> _logger;
 
+    }
+
+
+
+
+    public class ContractModel
+    {
+
+        public ContractModel()
+        {
+            this.Diagnostic = new List<string>();
+            this.Templates = new List<string>();
+        }
+
+        public List<string> Diagnostic { get; set; }
+        public List<string> Templates { get; set; }
     }
 
 

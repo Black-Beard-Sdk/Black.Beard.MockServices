@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Bb.Servers.Web.Models;
 using Bb.Servers.Web;
+using Microsoft.Extensions.FileProviders;
 
 namespace Bb.MockService
 {
@@ -14,7 +15,6 @@ namespace Bb.MockService
     public class Startup : ServiceRunnerStartup
     {
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Startup"/> class.
         /// </summary>
@@ -24,7 +24,6 @@ namespace Bb.MockService
         {
 
         }
-
 
         public override void ConfigureServices(IServiceCollection services)
         {
@@ -50,6 +49,8 @@ namespace Bb.MockService
 
             base.ConfigureServices(services);
 
+            services.AddDirectoryBrowser();
+
         }
 
         /// <summary>
@@ -73,9 +74,32 @@ namespace Bb.MockService
 
             base.ConfigureApplication(app, env, loggerFactory);
 
+
+            //var path = Path.Combine(env.ContentRootPath, "www");
+            var requestPath = "/www";
+            var fileProvider = new PhysicalFileProvider(GlobalConfiguration.CurrentDirectoryToWriteGenerators);
+
+            app.UseStaticFiles();
+
+            // Enable displaying browser links.
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = fileProvider,
+                RequestPath = requestPath
+            });
+
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            {
+                FileProvider = fileProvider,
+                RequestPath = requestPath
+            });
+
+
+
             app
                 .UseHttpsRedirection()
                 .UseRouting()
+                
                 .UseListener()
 
                 //.UseApiKey()                      // Intercept apiKey and create identityPrincipal associated

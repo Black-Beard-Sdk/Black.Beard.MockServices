@@ -46,15 +46,15 @@ namespace Bb.OpenApiServices
                 GenerateTemplate(self, item, string.Empty);
             }
 
-            foreach (var item in ResolveResponseSchemas(self, "4"))
-            {
-                GenerateTemplate(self, item, "400");
-            }
+            //foreach (var item in ResolveResponseSchemas(self, "4"))
+            //{
+            //    GenerateTemplate(self, item, "400");
+            //}
 
-            foreach (var item in ResolveResponseSchemas(self, "5"))
-            {
-                GenerateTemplate(self, item, "500");
-            }
+            //foreach (var item in ResolveResponseSchemas(self, "5"))
+            //{
+            //    GenerateTemplate(self, item, "500");
+            //}
 
             return null;
 
@@ -623,11 +623,11 @@ namespace Bb.OpenApiServices
             foreach (var item in ResolveResponseSchemas(value, "2"))
                 GenerateTemplate(value, item, string.Empty);
 
-            foreach (var item in ResolveResponseSchemas(value, "4"))
-                GenerateTemplate(value, item, "400");
+            //foreach (var item in ResolveResponseSchemas(value, "4"))
+            //    GenerateTemplate(value, item, "400");
 
-            foreach (var item in ResolveResponseSchemas(value, "5"))
-                GenerateTemplate(value, item, "500");
+            //foreach (var item in ResolveResponseSchemas(value, "5"))
+            //    GenerateTemplate(value, item, "500");
 
             return null;
         
