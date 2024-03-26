@@ -66,7 +66,7 @@ namespace Bb.Services
         /// <param name="upFile">The uploaded file.</param>
         public ProjectBuilderContract WriteOnDisk(IFormFile upFile)
         {
-            
+
             var target = Root.Combine("model" + Path.GetExtension(upFile.FileName))
                 .AsFile();
 
@@ -106,12 +106,13 @@ namespace Bb.Services
             return ctx;
         }
 
+
         /// <summary>
         /// Generate the listener
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        public HttpListenerBase Generate(ContextGenerator ctx)
+        public OpenApiDocument GetOpenApiContract()
         {
 
             if (string.IsNullOrEmpty(_templateFilename))
@@ -129,7 +130,19 @@ namespace Bb.Services
             }
 
             var _document = _templateFilename.LoadOpenApiContract();
+            return _document;
 
+        }
+
+        /// <summary>
+        /// Generate the listener
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        public HttpListenerBase Generate(ContextGenerator ctx)
+        {
+
+            var _document = GetOpenApiContract();
 
             ctx = new ContextGenerator(Root);
 

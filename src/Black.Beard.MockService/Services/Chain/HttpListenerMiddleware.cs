@@ -27,8 +27,8 @@ namespace Bb.Services.Chain
                 var contract = GetContract(path);
                 if (contract != null)
                 {
-                    var listener = contract.Get();
 
+                    var listener = contract.Get();
                     var ctx = new HttpListenerContext(context, this.processor);
 
                     await listener.InvokeAsync(ctx);

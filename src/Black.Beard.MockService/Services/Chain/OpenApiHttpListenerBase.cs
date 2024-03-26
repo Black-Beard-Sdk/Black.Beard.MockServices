@@ -22,6 +22,7 @@ namespace Bb.Services.Chain
 
         public void Parse(OpenApiDocument self, ContextGenerator ctx)
         {
+            this._document = self;
             Initialize(ctx);
             this.Result = self.Accept(this);
         }
@@ -30,6 +31,6 @@ namespace Bb.Services.Chain
         public HttpListenerBase Result { get; private set; }
 
         protected OpenApiDocument _self;
-
+        private OpenApiDocument _document;
     }
 }
