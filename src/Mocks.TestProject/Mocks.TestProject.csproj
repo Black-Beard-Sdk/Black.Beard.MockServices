@@ -11,7 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="Black.Beard.Helpers" Version="2.0.32" />
-    <PackageReference Include="Black.Beard.Web.Server" Version="1.0.11" />
+    <PackageReference Include="Black.Beard.Http" Version="1.0.20" />
+    <PackageReference Include="Black.Beard.Web.Server" Version="1.0.14" />
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -27,6 +28,15 @@
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Contracts\contractFailed.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Contracts\contract1.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

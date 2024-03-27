@@ -18,7 +18,7 @@ namespace Bb.Services.Chain
 
         }
 
-
+        
         public override HttpListenerBase? VisitDocument(OpenApiDocument self)
         {
             return self.Paths.Accept(this);

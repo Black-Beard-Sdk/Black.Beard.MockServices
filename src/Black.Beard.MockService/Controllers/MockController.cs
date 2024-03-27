@@ -5,6 +5,8 @@ using Bb.Services.Managers;
 using Bb.Curls;
 using Bb.Servers.Exceptions;
 using Bb.OpenApiServices;
+using Bb.Models;
+using Bb.Attributes;
 
 namespace Bb.ParrotServices.Controllers
 {
@@ -30,45 +32,42 @@ namespace Bb.ParrotServices.Controllers
         }
 
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //[Consumes("application/text")]
-        [HttpPost("Test")]
-        //[RequestSizeLimit(100_000_000)]
-        public async Task<IActionResult> Test([FromBody] string call)
-        {
-            CurlInterpreter curl = call;
-            try
-            {
-                var result = await curl.CallToStringAsync();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-        }
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        ////[Consumes("application/text")]
+        //[HttpPost("Test")]
+        ////[RequestSizeLimit(100_000_000)]
+        //public async Task<IActionResult> Test([FromBody] string call)
+        //{
+        //    CurlInterpreter curl = call;
+        //    try
+        //    {
+        //        var result = await curl.CallToStringAsync();
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
 
 
         /// <summary>
-        /// Uploads the data source contract on server and generate the project for the specified contract.
+        /// Uploads the data source contract (OpenApi) on server and generate the jslt templates for the specified contract.
         /// </summary>
-        /// <param name="template">template name of generation. If you don"t know. use 'mock'</param>
         /// <param name="contract">The unique contract name.</param>
         /// <param name="upfile">The file to upload that contains the contract in open api 3.*.</param>
         /// <returns>Return the list of template.</returns>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string[]))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ContractModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ContractModel))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(HttpExceptionModel))]
         [HttpPost("{contract}/upload")]
-        //[Consumes("form-data")]
         [Produces("application/json")]
         [RequestSizeLimit(100_000_000)]
-        //[DisableRequestSizeLimit]
         public async Task<IActionResult> UploadOpenApiContract([FromRoute] string contract, IFormFile upfile)
         {
 
-            _logger.LogDebug("Upload root : {root}", _builder.Root);
+            _logger.LogDebug("Upload contract : {contract}", contract);
 
             // verify fileInfo
             if (string.IsNullOrEmpty(upfile?.FileName))
@@ -89,38 +88,67 @@ namespace Bb.ParrotServices.Controllers
                                .Generate()
                                ;
 
-            _builder.RegenerateIndex();
 
-            if (ctx.Diagnostics.Success)
+            if (!ctx.Diagnostics.Success)
             {
-                _logger.LogInformation($"{contract} has been generated");
-                var templates = _contract.Templates().Select(c => c.Name).ToList();
-                return Ok(GetModel(ctx.Diagnostics, templates));
-            }
-            else
-            {
+                _contract.Clean();
                 _logger.LogInformation($"{contract} has been failed");
                 return BadRequest(GetModel(ctx.Diagnostics, null));
             }
+
+            _builder.RegenerateIndex();
+            _logger.LogInformation($"{contract} has been generated");
+            var templates = _contract.Templates();
+            return Ok(GetModel(ctx.Diagnostics, templates));
+        
+        }
+
+
+        /// <summary>
+        /// Clean specified contract.
+        /// </summary>
+        /// <param name="contract">The unique contract name.</param>
+        /// <returns>Return the list of template.</returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(HttpExceptionModel))]
+        [HttpPost("{contract}/clean")]
+        public async Task<IActionResult> CleanContract([FromRoute] string contract)
+        {
+
+            _logger.LogDebug("clean {contract}", contract);
+
+            var _contract = _builder.Contract(contract, false);
+            if (_contract == null)
+                return BadRequest();
+
+            _contract.Clean();
+            
+            _logger.LogInformation($"{contract} has been removed");
+
+            await Task.Yield(); // make the method async
+
+            return NotFound();
 
         }
 
         /// <summary>
         /// Download the specified data template.
         /// </summary>
-        /// <param name="template">template name of generation. If you don"t know. use 'mock'</param>
         /// <param name="contract">The unique contract name.</param>
         /// <param name="filename">the filename that you want download..</param>
         /// <returns></returns>
         /// <exception cref="T:NotFoundObjectResult">the template is not found</exception>
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(HttpExceptionModel))]
         [HttpGet("{contract}/download_template")]
         [Produces("application/octet-stream")]
+        [FileResultContentType("application/octet-stream")]
         public async Task<IActionResult> DownloadDataTemplate([FromRoute] string contract, [FromQuery] string filename)
         {
 
-            _logger.LogDebug("Download root : {root}", _builder.Root);
+            _logger.LogDebug("Download template {contract}:{filename}", contract, filename);
 
             var _contract = _builder.Contract(contract, true);
 
@@ -146,6 +174,7 @@ namespace Bb.ParrotServices.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(HttpExceptionModel))]
         [HttpPost("{contract}/upload_template")]
         public async Task<IActionResult> UploadDataTemplate([FromRoute] string contract, IFormFile upfile)
         {
@@ -183,7 +212,10 @@ namespace Bb.ParrotServices.Controllers
             var model = new ContractModel();
 
             foreach (var diagnostic in diagnostics)
-                model.Diagnostic.Add(diagnostic.ToString());
+            {
+                var location = diagnostic.Location?.Start?.ToString();
+                model.Diagnostic.Add(new Diagnostic(diagnostic.Severity, diagnostic.Message) { Location = location });
+            }
 
             if (templates != null)
                 foreach (var template in templates)
@@ -196,22 +228,6 @@ namespace Bb.ParrotServices.Controllers
         internal readonly ProjectBuilderProvider _builder;
         private readonly ILogger<MockController> _logger;
 
-    }
-
-
-
-
-    public class ContractModel
-    {
-
-        public ContractModel()
-        {
-            this.Diagnostic = new List<string>();
-            this.Templates = new List<string>();
-        }
-
-        public List<string> Diagnostic { get; set; }
-        public List<string> Templates { get; set; }
     }
 
 

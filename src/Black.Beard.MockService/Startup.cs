@@ -94,8 +94,6 @@ namespace Bb.MockService
                 RequestPath = requestPath
             });
 
-
-
             app
                 .UseHttpsRedirection()
                 .UseRouting()

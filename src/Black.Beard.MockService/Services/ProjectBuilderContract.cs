@@ -55,9 +55,13 @@ namespace Bb.Services
         /// </summary>
         /// <param name="templateName">Name of the template.</param>
         /// <returns></returns>
-        public IEnumerable<FileInfo> Templates()
+        public IEnumerable<string> Templates()
         {
-            return Root.Combine("Templates").AsDirectory().GetFiles("*.json").ToArray();
+            var dir = Root.Combine("Templates").AsDirectory();
+            dir.Refresh();
+            if (dir.Exists)
+                return dir.GetFiles("*.json").Select(c => c.Name).ToArray();
+            return null;
         }
 
         public FileInfo? ResolvePath(string filename)
@@ -95,8 +99,11 @@ namespace Bb.Services
         {
 
             if (_listener == null)
-                _listener = Generate(new ContextGenerator(Root));
-
+            {
+                var ctx = new ContextGenerator(Root);
+                _listener = Generate(ref ctx);
+            }
+            
             return _listener;
 
         }
@@ -108,7 +115,7 @@ namespace Bb.Services
         public ContextGenerator Generate()
         {
             var ctx = new ContextGenerator(Root);
-            Generate(ctx);
+            Generate(ref ctx);
             return ctx;
         }
 
@@ -145,53 +152,58 @@ namespace Bb.Services
         /// </summary>
         /// <param name="ctx"></param>
         /// <returns></returns>
-        public HttpListenerBase Generate(ContextGenerator ctx)
+        public HttpListenerBase? Generate(ref ContextGenerator ctx)
         {
 
             var _document = GetOpenApiContract();
 
-            ctx = new ContextGenerator(Root);
+            if (ctx == null)
+                ctx = new ContextGenerator(Root)
+                {
+                 
+                };
 
             new ServiceGeneratorProcess<OpenApiDocument>(ctx)
                 .Append(new OpenApiValidator())
                 .Generate(_document);
 
-            new ServiceGeneratorProcess<OpenApiDocument>(ctx)
-                .Append(new OpenApiGenerateDataTemplate())
-                .Generate(_document);
-
-            var generator = new OpenApiHttpListener();
-            generator.Parse(_document, ctx);
-
-
-            if (_index.Exists)
+            if (ctx.Diagnostics.Success)
             {
-                var content = _index.LoadFromFile()
-                    .Replace("{{path}}", @".\" + Path.GetFileName(_templateFilename))
-                    
-                    ;
-                var indexTarget = Root.Combine("index.html").AsFile();
 
-                if (indexTarget.Exists)
-                    indexTarget.Delete();
+                new ServiceGeneratorProcess<OpenApiDocument>(ctx)
+                    .Append(new OpenApiGenerateDataTemplate())
+                    .Generate(_document);
 
-                indexTarget.FullName.Save(content);
+                var generator = new OpenApiHttpListener();
+                generator.Parse(_document, ctx);
+
+
+                if (_index.Exists)
+                {
+                    var content = _index.LoadFromFile()
+                        .Replace("{{path}}", @".\" + Path.GetFileName(_templateFilename))
+
+                        ;
+                    var indexTarget = Root.Combine("index.html").AsFile();
+
+                    if (indexTarget.Exists)
+                        indexTarget.Delete();
+
+                    indexTarget.FullName.Save(content);
+                }
+
+                return generator.Result;
+
             }
 
-
-            return generator.Result;
+            return null;
 
         }
 
 
-        /// <summary>
-        /// Removes the template if exists.
-        /// </summary>
-        public void RemoveTemplateIfExists()
+        public void Clean()
         {
-            var f = new FileInfo(_templateFilename);
-            if (f.Exists)
-                f.Delete();
+            Root.AsDirectory().Delete(true);
         }
 
 

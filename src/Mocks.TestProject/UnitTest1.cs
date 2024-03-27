@@ -1,5 +1,7 @@
+using Bb;
 using Bb.Curls;
 using Bb.MockService;
+using System.Reflection;
 
 
 namespace Mocks.TestProject
@@ -8,9 +10,11 @@ namespace Mocks.TestProject
     public class UnitTest1
     {
 
-
         public UnitTest1()
         {
+
+             var dir = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
+            _contracts = dir.Combine("contracts").AsDirectory();
 
             //GlobalConfiguration.UseSwagger = true;
             //GlobalConfiguration.TraceAll = true;
@@ -20,58 +24,77 @@ namespace Mocks.TestProject
         }
 
         [TestMethod]
-        public void UploadMethod2()
+        public void ContractFailed()
         {
 
-            string host = null; // "localhost";
-            int port = 5000;
-            using (var service = Program.GetService(new string[] { })
-                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
-                .StartService(out var task))
-            {
-
-                CurlInterpreter cmd = $"curl -X 'POST' 'http://localhost:{port}/Mock/Test' -H 'accept: */*' -H 'Content-Type: application/json' -d '\"string\"'";
-                var a = cmd.ResultToJson().ToString();
-
-            }
-
-        }
-
-        [TestMethod]
-        public void UploadMethod1()
-        {
-
-            string host = null; // "localhost";
-            int port = 5000;
-            using (var service = Program.GetService(new string[] { })
-                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
-                .StartService(out var task))
-            {
-
-                CurlInterpreter cmd = $"curl -X 'POST' 'http://localhost:{port}/Mock/parcel/upload' -H 'accept: */*' -H 'Content-Type: multipart/form-data' -F 'upfile=@C:\\Users\\g.beard\\Desktop\\Test curl\\swagger.json;type=application/json'";
-                var a = cmd.ResultToJson().ToString();
-
-            }
-
-        }
-
-        [TestMethod]
-        public void TestMethod1()
-        {
-
+            var file = _contracts.GetFiles("contractFailed.yaml").First().FullName;
+            string contract = "contract1";
             string host = "localhost";
             int port = 5000;
             using (var service = Program.GetService(new string[] { })
-            .AddLocalhostUrlWithDynamicPort("http", host, ref port)
-                .StartService(out var task))
+                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
+                .StartService()
+                .Wait(c => c.Status == Bb.Servers.Web.ServiceRunnerStatus.Running)
+                )
             {
 
-                CurlInterpreter cmd = $"curl -X GET \"http://localhost:{port}/proxy/parcel/ParcelTracking/11111\" -H \"accept: application/json\"";
-                var a = cmd.ResultToString();
+                CurlInterpreter cmd = $"curl " +
+                    $"-X 'POST' 'http://{host}:{port}/Mock/{contract}/upload' " +
+                    $"-H 'accept: */*' " +
+                    $"-H 'Content-Type: multipart/form-data' " +
+                    $"-F 'upfile=@{file};type=application/json'";
+                var p = cmd.ResultToJson(false);
+
+                Assert.IsFalse(cmd.LastResponse.IsSuccessStatusCode);
 
             }
 
         }
+
+        [TestMethod]
+        public void Contract1()
+        {
+
+            var file = _contracts.GetFiles("contract1.yaml").First().FullName;
+            string contract = "contract2";
+            string host = "localhost";
+            int port = 5000;
+            using (var service = Program.GetService(new string[] { })
+                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
+                .StartService()
+                .Wait(c => c.Status == Bb.Servers.Web.ServiceRunnerStatus.Running)
+                )
+            {
+
+                CurlInterpreter cmd = $"curl " +
+                    $"-X 'POST' 'http://{host}:{port}/Mock/{contract}/upload' " +
+                    $"-H 'accept: */*' " +
+                    $"-H 'Content-Type: multipart/form-data' " +
+                    $"-F 'upfile=@{file};type=application/json'";
+                var p = cmd.ResultToString(false);                
+
+                if (cmd.LastResponse.IsSuccessStatusCode)
+                {
+
+                    CurlInterpreter cmd2 = $"curl " +
+                        $"-X GET 'http://{host}:{port}/proxy/{contract}/api/v40/method1'" +
+                        $"-H 'accept: application/json'";
+
+                    p = cmd2.ResultToString();
+
+                }
+
+                cmd = $"curl " +
+                    $"-X 'POST' 'http://{host}:{port}/Mock/{contract}/clean' " +
+                    $"-H 'accept: */*' ";
+                p = cmd.ResultToString(false);
+
+            }
+
+        }
+
+
+        private DirectoryInfo _contracts;
 
     }
 

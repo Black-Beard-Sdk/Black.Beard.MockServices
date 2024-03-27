@@ -1,0 +1,129 @@
+---
+openapi: 3.0.0
+info:
+  description: contract1
+  version: 1.0.0
+  title: Test get
+servers:
+- url: https://beard.cool
+  description: Main server
+paths:
+  "/api/v40/method1":
+    post:
+      tags:
+      - ctr11
+      summary: Contract failed
+      description: Defines a contract.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              maxLength: 500
+              items: 
+               "$ref": "#/components/schemas/RequestItem"
+      parameters:
+      - name: compactErrors
+        in: header
+        description: Omit origin message in the validation error response
+        schema:
+          type: boolean
+        required: false
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '401':
+          description: Authentication information is missing or invalid
+        '413':
+          description: Request Entity Too Large
+        '460':
+          description: Unable to process shipments in the request
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Response200"
+        '461':
+          description: Unexisting BU code
+        '500':
+          description: Unexpected error
+        '503':
+          description: Service unavailable
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: apikey
+  schemas:
+    RequestItem:
+      type: object
+      required:
+      - results
+      properties:
+        Data1:
+          type: object
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResponseResults"
+    Response200:
+      type: object
+      required:
+      - results
+      properties:
+        Data1:
+          type: object
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResponseResults"
+    ResponseResults:
+      title: ResponseResults
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 3
+        message:
+          type: string
+    Date:
+      type: string
+      format: date
+      example: '2008-02-13'
+    DateTime:
+      type: string
+      description: UTC time
+      format: date-time
+      example: '2020-03-12T12:30:11Z'
+    Qualif:
+      type: string
+      enum: [V1, V2, V3]
+    Dimensions:
+      title: Dimensions
+      description: Measured 3D dimensions of the individual object
+        in centimeters
+      properties:
+        length:
+          type: integer
+          maxLength: 3
+        width:
+          type: integer
+          maxLength: 3
+        height:
+          type: integer
+          maxLength: 3
+        qualif:
+          "$ref": "#/components/schemas/Qualif"
+    Weight:
+      title: Weight
+      properties:
+        value:
+          type: integer
+          maximum: 99999999
+        qualif:
+          "$ref": "#/components/schemas/Qualif"
+security:
+- ApiKeyAuth: []
