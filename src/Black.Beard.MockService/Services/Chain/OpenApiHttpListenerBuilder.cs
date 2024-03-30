@@ -367,6 +367,9 @@ namespace Bb.Services.Chain
             schema["definitions"] = definitions;
             Store("content", schema);
 
+
+            var txt = schema.ToString();
+
             return null;
 
         }
@@ -377,7 +380,7 @@ namespace Bb.Services.Chain
             var target = new JsonObject()
             {
                 ["$id"] = "http://local/" + name + suffix,
-                ["$schema"] = "http://json-schema.org/draft-04/schema#",
+                ["$schema"] = "https://json-schema.org/draft/2019-09/schema",
                 ["title"] = name + suffix,                
             };
 
@@ -628,7 +631,8 @@ namespace Bb.Services.Chain
                 if (rootKey == name)
                 {
                     result = current.Value;
-                    definitions.Add(name, result.Value.AsNode());
+                    JsonNode value = JsonNode.Parse(ConvertPath(current.Value.GetRawText()));
+                    definitions.Add(name, value);
                 }
                 else if (hashSet.Contains(name))
                 {
@@ -680,7 +684,7 @@ namespace Bb.Services.Chain
                 target["minItems"] = source.MinItems.Value;
 
             if (source.MaxItems.HasValue)
-                target["mawItems"] = source.MaxItems.Value;
+                target["maxItems"] = source.MaxItems.Value;
 
             if (source.AdditionalPropertiesAllowed)
                 target["additionalProperties"] = true;

@@ -20,7 +20,7 @@ paths:
           application/json:
             schema:
               type: array
-              maxLength: 500
+              maxItems: 500
               items: 
                "$ref": "#/components/schemas/RequestItem"
       parameters:

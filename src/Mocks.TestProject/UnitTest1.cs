@@ -35,7 +35,6 @@ namespace Mocks.TestProject
             using (var service = Program.GetService(new string[] { })
                 .AddLocalhostUrlWithDynamicPort("http", host, ref port)
                 .Start(true)
-                .Wait(c => c.Status == Bb.Servers.Web.ServiceRunnerStatus.Running)
                 )
             {
 
@@ -77,8 +76,9 @@ namespace Mocks.TestProject
                 {
 
                     CurlInterpreter cmd2 = $"curl " +
-                        $"-X GET 'http://{host}:{port}/proxy/{contract}/api/v41/method1' " +
-                        $"-H 'accept: application/json'";
+                        $"-X POST 'http://{host}:{port}/proxy/{contract}/api/v41/method1' " +
+                        $"-H 'accept: application/json' " +
+                        "-d '[ ]' ";
 
                     p = cmd2.ResultToString();
 

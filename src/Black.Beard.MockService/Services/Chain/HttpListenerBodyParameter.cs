@@ -18,11 +18,16 @@ namespace Bb.Services.Chain
         public HttpListenerBodyParameter(bool required, Type? type = null, JsonSchema? schema = null)
             : base("body", required)
         {
-            
+
             this._type = type;
             this._schema = schema;
-            
-            
+
+            _options = new EvaluationOptions()
+            {
+                Culture = CultureInfo.InvariantCulture,
+                OutputFormat = OutputFormat.Hierarchical,
+            };
+
 
         }
 
@@ -34,7 +39,7 @@ namespace Bb.Services.Chain
 
             if (context.Context.Request.Body.CanRead)
             {
-                
+
                 if (_type != null)
                 {
 
@@ -51,34 +56,47 @@ namespace Bb.Services.Chain
                     if (_schema != null)
                     {
 
-                        var options = new EvaluationOptions()
+                        if (!string.IsNullOrEmpty(bodyStr))
                         {
-                            Culture = CultureInfo.InvariantCulture,
-                            OutputFormat = OutputFormat.Hierarchical,
-                        };
+                            try
+                            {
+                                var result1 = _schema.Evaluate(JsonNode.Parse(bodyStr), _options);
+                                if (!result1.IsValid)
+                                {
+                                    context.Context.Response.StatusCode = 400;
+                                    context.Context.Response.ContentType = "application/json";
+                                    await context.Context.Response.WriteAsJsonAsync(result1);
+                                    return;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
 
-                        var result = _schema.Evaluate(JsonObject.Parse(bodyStr), options);
-                        if (!result.IsValid)
+                            }
+
+                        }
+                        else
                         {
                             context.Context.Response.StatusCode = 400;
                             context.Context.Response.ContentType = "application/json";
-                            await context.Context.Response.WriteAsJsonAsync(result);
+                            await context.Context.Response.WriteAsJsonAsync(new { message = "body is empty" });
                             return;
-                        }
+                        }                        
 
                     }
 
                 }
 
-            }
+                if (Next != null)
+                    await Next.InvokeAsync(context);
 
-            if (Next != null)
-                await Next.InvokeAsync(context);
+            }
 
         }
 
         private readonly Type? _type;
         private readonly JsonSchema _schema;
+        private readonly EvaluationOptions _options;
     }
 
 

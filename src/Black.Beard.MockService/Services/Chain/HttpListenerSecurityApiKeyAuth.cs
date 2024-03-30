@@ -38,7 +38,21 @@ namespace Bb.Services.Chain
 
             if (_items.TryGetValue(value, out var userValue))
             {
-                user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, userValue.Name) }));
+                user = new ClaimsPrincipal(
+                    new ClaimsIdentity(new Claim[] 
+                    { 
+                        new Claim(ClaimTypes.Name, userValue.Name)
+                        {
+                       
+                        }
+                    })
+                    {
+                        
+                    }
+                )
+                {
+                    
+                };
                 return true;
             }
 
