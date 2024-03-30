@@ -17,6 +17,18 @@
                 _next.SetNext(next);
         }
 
+        public override void Insert(HttpListenerBase next)
+        {
+            if (_next == null)
+                _next = next;
+            else
+            {
+                var o = _next;
+                _next = next;
+                _next.SetNext(o);
+            }
+        }
+
         internal override T Resolve<T>()
         {
         

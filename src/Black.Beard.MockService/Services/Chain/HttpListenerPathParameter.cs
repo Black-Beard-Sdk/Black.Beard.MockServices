@@ -1,12 +1,23 @@
-﻿namespace Bb.Services.Chain
+﻿using System.Xml.Linq;
+
+namespace Bb.Services.Chain
 {
     public class HttpListenerPathParameter : HttpListenerParameter
     {
 
-        public HttpListenerPathParameter(string name, bool required, int position) 
-            : base(name, required)
+        
+        public HttpListenerPathParameter(string name, int position) 
+            : base(name, true)
         {
             this.Position = position;
+        }
+
+
+        public static int ResolvePosition(string path, string name)
+        {
+            var p = path.Trim('/').Split('/');
+            var position = Array.IndexOf(p, "{" + name + "}");
+            return position;
         }
 
         public int Position { get; }
@@ -24,7 +35,7 @@
             if (Position < array.Length)
             {
                 var argument = array[Position];
-                context.AddArgument(this.Name, argument);
+                context.AddArgument(this.Name, argument.Trim());
             }
             else if (this.Required)
             {
@@ -33,7 +44,8 @@
                 return;
             }
 
-            await Next.InvokeAsync(context);
+            if (Next != null)
+                await Next.InvokeAsync(context);
 
         }
 

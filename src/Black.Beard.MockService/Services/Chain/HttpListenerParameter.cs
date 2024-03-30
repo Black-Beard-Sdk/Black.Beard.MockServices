@@ -1,5 +1,6 @@
 ﻿namespace Bb.Services.Chain
 {
+
     public abstract class HttpListenerParameter : HttpListenerChain
     {
 
@@ -11,6 +12,7 @@
         }
 
         public string Name { get; }
+
         public bool Required { get; }
         
     }

@@ -1,11 +1,15 @@
 ﻿namespace Bb.Services.Chain
 {
+
+
+
     public class HttpListener : HttpListenerBase
     {
 
 
         public HttpListener(string path) : base()
         {
+            this.PathToString = path;
             this.Path = path.Split('/');
             this._items = new List<HttpListenerBase>();
         }
@@ -23,16 +27,23 @@
             this._items.Add(next);
         }
 
+        public override void Insert(HttpListenerBase next)
+        {
+            this._items.Add(next);
+        }
+
         /// <summary>
         /// Evaluate if the request path is matched
         /// </summary>
         /// <param name="fullPath"></param>
         /// <returns></returns>
-        internal IEnumerable<HttpListenerBase> Match(string[] fullPath, string methodType)
+        internal IEnumerable<HttpListenerBase> Match(string[] fullPath, HttpListenerContext context)
         {
 
+            List<HttpListenerBase> result = new List<HttpListenerBase>();
+
             if (fullPath.Length > this.Path.Length)
-                yield  break;
+                return result;
 
             for (int i = 0; i < fullPath.Length; i++)
             {
@@ -45,21 +56,39 @@
                         // is a variable
                     }
                     else
-                        yield break;
+                    {
+                        context.Diagnostic($"Path : {this.PathToString} no match");
+                        return result;
+                    }
                 }
             }
 
+            context.Diagnostic($"Path : {this.PathToString} is matched");
+
+            string methodType = context.Context.Request.Method.ToUpper();
+
+            List<string> methods = new List<string>();
             foreach (var item in _items)
             {
-                HttpListenerMethod method = item.Resolve<HttpListenerMethod>();
-                if (method.Type.ToString().ToUpper() == methodType)
-                    yield return item;
-
+                HttpListenerMethodBase method = item.Resolve<HttpListenerMethodBase>();
+                if (method != null)
+                {
+                    var m = method.Type.ToString().ToUpper();
+                    if (m == methodType)
+                        result.Add(item);
+                    else
+                        methods.Add(m);
+                }
             }
 
-            yield break;
+            if (result.Count == 0)
+                context.Diagnostic($"Path : {this.PathToString} no method is matched {methodType} with available methods : {string.Join(", ", methods)}");
+
+            return result;
+
         }
 
+        public string PathToString { get; }
         public string[] Path { get; }
 
         private readonly List<HttpListenerBase> _items;

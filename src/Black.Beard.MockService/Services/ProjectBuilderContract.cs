@@ -1,5 +1,6 @@
 ﻿
 using Bb.Codings;
+using Microsoft.OpenApi.Extensions;
 using Bb.Extensions;
 using Bb.OpenApi;
 using Bb.OpenApiServices;
@@ -9,6 +10,7 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Expressions;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Validations;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Reflection;
@@ -27,16 +29,23 @@ namespace Bb.Services
         /// </summary>
         /// <param name="parent">The parent.</param>
         /// <param name="contract">The contract.</param>
-        public ProjectBuilderContract(ProjectBuilderProvider parent, string contract)
+        public ProjectBuilderContract(ProjectBuilderProvider parent, string contract, bool virtualContract)
         {
+
             Parent = parent;
             _logger = parent._logger;
             ContractName = contract;
-            Root = parent.Root.Combine(contract);
+            _virtual = virtualContract;
 
-            _rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
-            _index = _rootWww.Combine("Generators", "_index.html").AsFile();
-            _index.Refresh();
+            if (!virtualContract)
+            {
+                Root = parent.Root.Combine(contract);
+                _rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
+                _index = _rootWww.Combine("Generators", "_index.html").AsFile();
+                _index.Refresh();
+            }
+
+
 
         }
 
@@ -47,6 +56,8 @@ namespace Bb.Services
         /// <returns></returns>
         public bool TemplateExistsOnDisk(string templateName)
         {
+            if (_virtual)
+                return false;
             return Directory.Exists(Root.Combine("Templates", templateName + ".json"));
         }
 
@@ -55,8 +66,10 @@ namespace Bb.Services
         /// </summary>
         /// <param name="templateName">Name of the template.</param>
         /// <returns></returns>
-        public IEnumerable<string> Templates()
+        public IEnumerable<string>? Templates()
         {
+            if (_virtual)
+                return null;
             var dir = Root.Combine("Templates").AsDirectory();
             dir.Refresh();
             if (dir.Exists)
@@ -66,6 +79,8 @@ namespace Bb.Services
 
         public FileInfo? ResolvePath(string filename)
         {
+            if (_virtual)
+                return null;
             return Root.Combine("Templates").AsDirectory().GetFiles(filename).FirstOrDefault();
         }
 
@@ -77,8 +92,15 @@ namespace Bb.Services
         public ProjectBuilderContract WriteOnDisk(IFormFile upFile)
         {
 
+            if (_virtual)
+                return this;
+
             var target = Root.Combine("model" + Path.GetExtension(upFile.FileName))
                 .AsFile();
+
+            target.Refresh();
+            if (target.Exists)
+                target.Delete();
 
             var file = upFile.Save(target, true);
             _templateFilename = file.FullName;
@@ -91,22 +113,34 @@ namespace Bb.Services
 
         }
 
+
+        /// <summary>
+        /// Set the listener.
+        /// </summary>
+        /// <param name="listener"></param>
+        public void Set(HttpListeners listener)
+        {
+            _listener = listener;
+        }
+
+
         /// <summary>
         /// Return the listener.
         /// </summary>
         /// <returns></returns>
-        public HttpListenerBase Get()
+        public HttpListenerBase? Get()
         {
 
             if (_listener == null)
             {
                 var ctx = new ContextGenerator(Root);
-                _listener = Generate(ref ctx);
+                _listener = (HttpListeners)Generate(ref ctx);
             }
             
             return _listener;
 
         }
+
 
         /// <summary>
         /// Generate the model ans return the diagnostic
@@ -115,7 +149,7 @@ namespace Bb.Services
         public ContextGenerator Generate()
         {
             var ctx = new ContextGenerator(Root);
-            Generate(ref ctx);
+            _listener = (HttpListeners)Generate(ref ctx);
             return ctx;
         }
 
@@ -147,6 +181,7 @@ namespace Bb.Services
 
         }
 
+
         /// <summary>
         /// Generate the listener
         /// </summary>
@@ -163,8 +198,18 @@ namespace Bb.Services
                  
                 };
 
+
+            var errors = _document.Validate(ValidationRuleSet.GetDefaultRuleSet());
+
+            if (errors.Any())
+            {
+                foreach (var item in errors)
+                    ctx.Diagnostics.AddError(new Analysis.DiagTraces.LocationPath(item.Pointer), "error", item.Message);
+                return null;
+            }
+
             new ServiceGeneratorProcess<OpenApiDocument>(ctx)
-                .Append(new OpenApiValidator())
+                .Append(new Bb.OpenApiServices.OpenApiValidator())
                 .Generate(_document);
 
             if (ctx.Diagnostics.Success)
@@ -174,7 +219,7 @@ namespace Bb.Services
                     .Append(new OpenApiGenerateDataTemplate())
                     .Generate(_document);
 
-                var generator = new OpenApiHttpListener();
+                var generator = new OpenApiHttpListenerBuilder();
                 generator.Parse(_document, ctx);
 
 
@@ -195,6 +240,10 @@ namespace Bb.Services
                 return generator.Result;
 
             }
+            else
+            {
+                
+            }
 
             return null;
 
@@ -211,6 +260,7 @@ namespace Bb.Services
         /// The contract name
         /// </summary>
         public readonly string ContractName;
+        private readonly bool _virtual;
 
         /// <summary>
         /// The path root
@@ -230,6 +280,6 @@ namespace Bb.Services
         internal readonly ILogger<ProjectBuilderProvider> _logger;
         private volatile object _lock = new object();
         private string _templateFilename;
-        private HttpListenerBase _listener;
+        private HttpListeners _listener;
     }
 }

@@ -78,7 +78,27 @@ namespace Bb.Services.Managers
                 lock (_lock)
                     if (!_items.TryGetValue(contractName, out builder))
                         if (createIfNotExists)
-                            _items.Add(contractName, builder = new ProjectBuilderContract(this, contractName));
+                            _items.Add(contractName, builder = new ProjectBuilderContract(this, contractName, false));
+
+            return builder;
+
+        }
+
+        /// <summary>
+        /// return the contract for specified contract name.
+        /// </summary>
+        /// <param name="contractName">The contract name.</param>
+        /// <param name="createIfNotExists">if set to <c>true</c> [create if not exists].</param>
+        /// <returns></returns>
+        public ProjectBuilderContract VirtualContract(string contractName)
+        {
+
+            contractName = contractName.ToLower();
+
+            if (!_items.TryGetValue(contractName, out var builder))
+                lock (_lock)
+                    if (!_items.TryGetValue(contractName, out builder))
+                            _items.Add(contractName, builder = new ProjectBuilderContract(this, contractName, true));
 
             return builder;
 
@@ -104,11 +124,10 @@ namespace Bb.Services.Managers
 
             indexTarget.FullName.Save(content);
 
-
         }
 
         /// <summary>
-        /// Return ths list of html contract index.
+        /// Return the list of Html contract index.
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetItems()
@@ -118,11 +137,18 @@ namespace Bb.Services.Managers
             foreach (var item in r.GetDirectories())
             {
                 var c = item.GetFiles("index.html").FirstOrDefault();
-                if (c.Exists)
+                if (c != null)
                 {
-                    var path = "/" + Path.Combine("www", c.FullName.Substring(Root.Length + 1)).Replace("\\", "/");
-                    var t = $"<div><a href=\"{path}\">{item.Name}</a> </div>";
-                    _items.Add(t);
+                    if (c.Exists)
+                    {
+                        var path = "/" + Path.Combine("www", c.FullName.Substring(Root.Length + 1)).Replace("\\", "/");
+                        var t = $"<div><a href=\"{path}\">{item.Name}</a> </div>";
+                        _items.Add(t);
+                    }
+                }
+                else
+                {
+                    item.Delete(true);
                 }
             }
             return _items;

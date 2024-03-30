@@ -21,7 +21,7 @@ namespace Bb.Services.Chain
             NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(context.Context.Request.QueryString.ToString());
 
             if (queryString.AllKeys.Where(c => c == this.Name).Any())
-                context.AddArgument(this.Name, queryString[this.Name]);
+                context.AddArgument(this.Name, queryString[this.Name].Trim());
 
             else if (this.Required)
             {
@@ -30,7 +30,8 @@ namespace Bb.Services.Chain
                 return;
             }
 
-            await Next.InvokeAsync(context);
+            if (Next != null)
+                await Next.InvokeAsync(context);
 
         }
 

@@ -6,7 +6,7 @@ namespace Bb.Services.Chain
 {
 
 
-    public abstract class OpenApiHttpListenerBase 
+    public abstract class OpenApiHttpListenerBase
         : DiagnosticGeneratorBase<HttpListenerBase>
         , IServiceGenerator<OpenApiDocument>
     {
@@ -17,7 +17,7 @@ namespace Bb.Services.Chain
         /// </summary>
         public OpenApiHttpListenerBase()
         {
-
+            this._storings = new Stack<IStore>();
         }
 
         public void Parse(OpenApiDocument self, ContextGenerator ctx)
@@ -28,9 +28,77 @@ namespace Bb.Services.Chain
         }
 
 
+        protected void Store(string key, object value)
+        {
+            _storings.Peek().AddInStorage(key, value);
+        }
+
+        protected IStore Store()
+        {
+            return new _disposeStoringClass(this);
+        }
+
+        private class _disposeStoringClass : IStore
+        {
+
+            public _disposeStoringClass(OpenApiHttpListenerBase document)
+            {
+                _document = document;
+                this._dic = new Dictionary<string, object>();
+                _document._storings.Push(this);
+            }
+
+
+            public void AddInStorage(string key, object value)
+            {
+                if (_dic.ContainsKey(key))
+                    _dic[key] = value;
+                else
+                    _dic.Add(key, value);
+            }
+
+            public bool TryGetInStorage(string key, out object value)
+            {
+                return _dic.TryGetValue(key, out value);
+            }
+
+            public bool ContainsInStorage(string key)
+            {
+                return _dic.ContainsKey(key);
+            }
+
+
+            public void Dispose()
+            {
+                _document._storings.Pop();
+            }
+
+            private readonly OpenApiHttpListenerBase _document;
+            private readonly Dictionary<string, object> _dic;
+        }
+
+
+        private Stack<IStore> _storings = new Stack<IStore>();
+
         public HttpListenerBase Result { get; private set; }
 
-        protected OpenApiDocument _self;
-        private OpenApiDocument _document;
+        protected OpenApiDocument _document;
+
+
     }
+
+    public interface IStore : IDisposable
+    {
+
+        void AddInStorage(string key, object value);
+
+
+        bool TryGetInStorage(string key, out object value);
+
+
+        bool ContainsInStorage(string key);       
+
+    }
+
+
 }

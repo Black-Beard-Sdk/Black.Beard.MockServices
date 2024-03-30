@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Bb.Analysis.DiagTraces;
 using Microsoft.AspNetCore.Mvc;
 using Bb.Services.Managers;
-using Bb.Curls;
 using Bb.Servers.Exceptions;
 using Bb.OpenApiServices;
 using Bb.Models;
@@ -30,26 +29,6 @@ namespace Bb.ParrotServices.Controllers
             _builder = builder;
             _logger = logger;
         }
-
-
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        ////[Consumes("application/text")]
-        //[HttpPost("Test")]
-        ////[RequestSizeLimit(100_000_000)]
-        //public async Task<IActionResult> Test([FromBody] string call)
-        //{
-        //    CurlInterpreter curl = call;
-        //    try
-        //    {
-        //        var result = await curl.CallToStringAsync();
-        //        return Ok(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
 
 
         /// <summary>

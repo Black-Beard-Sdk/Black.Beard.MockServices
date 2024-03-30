@@ -11,10 +11,22 @@ namespace Bb.Services.Chain
 
         public HttpListenerMiddleware(RequestDelegate next, ProjectBuilderProvider builder)
         {
+
             _next = next;
             _builder = builder;
             _suffix = "/" + LabelProxy;
             this.processor = new ServiceProcessor();
+
+            if (_services != null)
+                foreach (var item in _services)
+                {
+                    var contract = _builder.VirtualContract(item.Item1);
+                    var listerners = new HttpListeners() { Contract = contract };
+                    listerners.AddPath(item.Item2, item.Item3);
+                    contract.Set(listerners);
+
+                }
+
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -27,10 +39,8 @@ namespace Bb.Services.Chain
                 var contract = GetContract(path);
                 if (contract != null)
                 {
-
                     var listener = contract.Get();
                     var ctx = new HttpListenerContext(context, this.processor);
-
                     await listener.InvokeAsync(ctx);
                     return;
                 }
@@ -59,10 +69,16 @@ namespace Bb.Services.Chain
 
         }
 
+        internal static void Configure(List<(string, string, Action<HttpListener>)> services)
+        {
+            _services = services;
+        }
+
         private readonly RequestDelegate _next;
         private readonly ProjectBuilderProvider _builder;
         private readonly string _suffix;
         private readonly ServiceProcessor processor;
+        private static List<(string, string, Action<HttpListener>)> _services;
         public const string LabelProxy = "proxy";
 
 

@@ -3,6 +3,7 @@
 namespace Bb.Services.Chain
 {
 
+
     public abstract class HttpListenerBase
     {
 
@@ -18,6 +19,10 @@ namespace Bb.Services.Chain
           
         }
 
+        public virtual void Insert(HttpListenerBase next)
+        {
+
+        }
 
         [DebuggerStepThrough]
         [DebuggerNonUserCode]

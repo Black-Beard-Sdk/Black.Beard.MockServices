@@ -2,12 +2,13 @@
 
 using Bb.Expressions;
 using Bb.Services.Managers;
+using System.Text;
 
 namespace Bb.Services.Chain
 {
+
     public class HttpListenerContext
     {
-
 
         public HttpListenerContext(HttpContext context, ServiceProcessor processor)
         {
@@ -18,6 +19,12 @@ namespace Bb.Services.Chain
 
         public HttpContext Context { get; }
 
+        public object Body { get; internal set; }
+
+        public bool TryGetArgument(string name, out object value)
+        {
+            return this._arguments.TryGetValue(name, out value);
+        }   
 
         public IEnumerable<KeyValuePair<string, object>> Arguments()
         {
@@ -55,6 +62,19 @@ namespace Bb.Services.Chain
 
         }
 
+        internal void Diagnostic(string log)
+        {
+            this._logs.Add(log);
+        }
+
+        public void WriteLogs(StringBuilder sb)
+        {
+            foreach (var item in _logs)
+                sb.AppendLine(item);
+        }
+
+
+        private List<string> _logs = new List<string>();
         private readonly Dictionary<string, object> _arguments;
         private readonly ServiceProcessor _processor;
 

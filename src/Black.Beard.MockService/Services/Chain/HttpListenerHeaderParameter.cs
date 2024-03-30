@@ -10,11 +10,21 @@
 
         public override async Task InvokeAsync(HttpListenerContext context)
         {
-            
-            //Stop();
 
             if (context.Context.Request.Headers.TryGetValue(this.Name, out var value))
-                context.AddArgument(this.Name, value);
+            {
+
+                if (value.Count == 1)
+                    context.AddArgument(this.Name, value[0].Trim());
+
+                else
+                {
+                    Stop();
+                }
+
+                
+
+            }
 
             else if (this.Required)
             {
@@ -23,7 +33,8 @@
                 return;
             }
 
-            await Next.InvokeAsync(context);
+            if (Next != null)
+                await Next.InvokeAsync(context);
 
         }
 

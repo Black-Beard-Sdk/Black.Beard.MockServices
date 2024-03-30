@@ -14,7 +14,7 @@
             //Stop();
 
             if (context.Context.Request.Cookies.TryGetValue(this.Name, out string value))
-                context.AddArgument(this.Name, value);
+                context.AddArgument(this.Name, value.Trim());
 
             else if (this.Required)
             {
@@ -23,7 +23,8 @@
                 return;
             }
 
-            await Next.InvokeAsync(context);
+            if (Next != null)
+                await Next.InvokeAsync(context);
 
         }
 

@@ -838,7 +838,7 @@ namespace Bb.OpenApiServices
             string name = ResolveName(item.Schema);
             var templateName = $"template_{name}_jslt.json";
 
-            if (item.Kind == ContentType.ApplicationJson)
+            if (item.Kind == "application/json")
             {
                 var content = item.Schema.Accept(this);
 

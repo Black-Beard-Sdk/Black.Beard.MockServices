@@ -1,6 +1,7 @@
 using Bb;
 using Bb.Curls;
 using Bb.MockService;
+using Bb.Servers.Web;
 using System.Reflection;
 
 
@@ -33,7 +34,7 @@ namespace Mocks.TestProject
             int port = 5000;
             using (var service = Program.GetService(new string[] { })
                 .AddLocalhostUrlWithDynamicPort("http", host, ref port)
-                .StartService()
+                .Start(true)
                 .Wait(c => c.Status == Bb.Servers.Web.ServiceRunnerStatus.Running)
                 )
             {
@@ -61,8 +62,7 @@ namespace Mocks.TestProject
             int port = 5000;
             using (var service = Program.GetService(new string[] { })
                 .AddLocalhostUrlWithDynamicPort("http", host, ref port)
-                .StartService()
-                .Wait(c => c.Status == Bb.Servers.Web.ServiceRunnerStatus.Running)
+                .Start(true)
                 )
             {
 
@@ -77,7 +77,7 @@ namespace Mocks.TestProject
                 {
 
                     CurlInterpreter cmd2 = $"curl " +
-                        $"-X GET 'http://{host}:{port}/proxy/{contract}/api/v40/method1'" +
+                        $"-X GET 'http://{host}:{port}/proxy/{contract}/api/v41/method1' " +
                         $"-H 'accept: application/json'";
 
                     p = cmd2.ResultToString();
