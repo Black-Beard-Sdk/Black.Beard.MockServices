@@ -38,21 +38,14 @@ namespace Bb.Services.Chain
 
             if (_items.TryGetValue(value, out var userValue))
             {
-                user = new ClaimsPrincipal(
-                    new ClaimsIdentity(new Claim[] 
-                    { 
-                        new Claim(ClaimTypes.Name, userValue.Name)
-                        {
-                       
-                        }
-                    })
-                    {
-                        
-                    }
-                )
+
+                var identity = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, userValue.Name) })
                 {
                     
                 };
+
+                user = new ClaimsPrincipal(identity);
+                
                 return true;
             }
 
@@ -141,8 +134,23 @@ namespace Bb.Services.Chain
                     break;
             }
 
-            if (_referential.TryGetValue(value, out var user))
-                context.Context.User = user;
+            if (_referential != null)
+            {
+
+                if (_referential.TryGetValue(value, out var user))
+                    context.Context.User = user;
+
+                else
+                {
+                    context.Context.Response.StatusCode = 401;
+                    context.Context.Response.ContentType = "text/plain";
+                    context.Context.Response.WriteAsJsonAsync("Unauthorized");
+                }
+            }
+            else
+                context.Diagnostic("ApiKeyReferentiel is not set");
+
+
 
             return Task.CompletedTask;
 

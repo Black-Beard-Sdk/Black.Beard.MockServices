@@ -368,7 +368,7 @@ namespace Bb.Services.Chain
             Store("content", schema);
 
 
-            var txt = schema.ToString();
+            // var txt = schema.ToString();
 
             return null;
 
