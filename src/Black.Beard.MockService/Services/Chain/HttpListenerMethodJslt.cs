@@ -18,13 +18,16 @@ namespace Bb.Services.Chain
 
             await base.InvokeAsync(context);
 
-            if (context.Context.Response.StatusCode != 0)
+            if (context.Context.Response.StatusCode != 0 && context.Context.Response.StatusCode != 200)
                 return;
 
             bool withDebug = false;
 
             var dic = new Dictionary<string, Oldtonsoft.Json.Linq.JToken>();
             context.Arguments().ToList().ForEach(c => dic.Add(c.Key, Oldtonsoft.Json.Linq.JToken.FromObject(c.Value)));
+
+            if (context.Body != null)
+                dic.Add("body", Oldtonsoft.Json.Linq.JToken.FromObject(context.Body));
 
             var datas = context.GetDatas(this._templateFileName, withDebug, dic);
 

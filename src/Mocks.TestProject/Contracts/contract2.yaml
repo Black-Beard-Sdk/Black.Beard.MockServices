@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  description: contract2
+  version: 2.0.0
+  title: Test get
+servers:
+- url: https://beard.cool
+  description: Main server
+paths:
+  "/v42/{cursor}":
+    post:
+      tags:
+      - ctr12
+      summary: Contract 2
+      description: Defines a contract.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              maxItems: 500
+              items: 
+               "$ref": "#/components/schemas/Item"      
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Response200"
+components:
+  schemas:
+    Item:
+      type: object
+      required:
+      - results
+      properties:
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResultObject"
+    Response200:
+      type: object
+      required:
+      - results
+      properties:
+        Data1:
+          type: object
+        results:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Date"
+    ResultOjbect:
+      title: ResultObject
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 3
+        message:
+          type: string
+    Date:
+      type: string
+      format: date
+      example: '2008-02-13'

@@ -150,8 +150,6 @@ namespace Bb.Services.Chain
             else
                 context.Diagnostic("ApiKeyReferentiel is not set");
 
-
-
             return Task.CompletedTask;
 
         }

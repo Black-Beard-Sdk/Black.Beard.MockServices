@@ -1,4 +1,3 @@
----
 openapi: 3.0.0
 info:
   description: contract1
@@ -22,14 +21,7 @@ paths:
               type: array
               maxItems: 500
               items: 
-               "$ref": "#/components/schemas/RequestItem"
-      parameters:
-      - name: compactErrors
-        in: header
-        description: Omit origin message in the validation error response
-        schema:
-          type: boolean
-        required: false
+               "$ref": "#/components/schemas/RequestItem"      
       responses:
         '200':
           description: OK

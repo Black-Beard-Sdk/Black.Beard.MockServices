@@ -63,9 +63,11 @@ namespace Bb.Services.Chain
                                 var result1 = _schema.Evaluate(JsonNode.Parse(bodyStr), _options);
                                 if (!result1.IsValid)
                                 {
+                                    var sb = new StringBuilder();
+                                    LogErrors(sb, result1);
                                     context.Context.Response.StatusCode = 400;
                                     context.Context.Response.ContentType = "application/json";
-                                    await context.Context.Response.WriteAsJsonAsync(result1);
+                                    await context.Context.Response.WriteAsJsonAsync(sb.ToString());
                                     return;
                                 }
                             }
@@ -81,7 +83,7 @@ namespace Bb.Services.Chain
                             context.Context.Response.ContentType = "application/json";
                             await context.Context.Response.WriteAsJsonAsync(new { message = "body is empty" });
                             return;
-                        }                        
+                        }
 
                     }
 
@@ -92,6 +94,19 @@ namespace Bb.Services.Chain
 
             }
 
+        }
+
+        private static void LogErrors(StringBuilder sb, EvaluationResults details)
+        {
+
+            if (details.HasErrors)
+                foreach (var item in details.Errors)
+                    sb.AppendLine($"[Error] ({item.Key}) '{item.Value}' at '{details.SchemaLocation.AbsoluteUri}'");
+
+            if (details.HasDetails)
+                foreach (EvaluationResults item in details.Details)
+                    LogErrors(sb, item);
+        
         }
 
         private readonly Type? _type;
