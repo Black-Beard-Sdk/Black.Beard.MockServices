@@ -215,6 +215,11 @@ namespace Bb.Services
             if (ctx.Diagnostics.Success)
             {
 
+
+                var a = new ModelAnalyze(ctx);
+                a.VisitDocument(_document);
+
+
                 new ServiceGeneratorProcess<OpenApiDocument>(ctx)
                     .Append(new OpenApiGenerateDataTemplate())
                     .Generate(_document);

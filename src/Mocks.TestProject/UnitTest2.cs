@@ -1,6 +1,8 @@
 using Bb;
 using Bb.Curls;
+using Bb.Extensions;
 using Bb.MockService;
+using Bb.OpenApiServices;
 using Bb.Services;
 using Bb.Services.Chain;
 using Microsoft.AspNetCore.Http;
@@ -11,12 +13,27 @@ namespace Mocks.TestProject
 {
     [TestClass]
     public class UnitTest2
-    {
+    {        
 
         public UnitTest2()
         {
             var dir = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
+            _contracts = dir.Combine("contracts").AsDirectory();
+
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+        }
+
+        [TestMethod]
+        public void TestConvetionOfName()
+        {
+
+            var file = _contracts.GetFiles("contract3.yaml").First().FullName;
+            var _document = file.LoadOpenApiContract();
+
+            var ctx = new ContextGenerator(_contracts.FullName);
+            var visitor = new ModelAnalyze(ctx);
+            visitor.VisitDocument(_document);
+
         }
 
         [TestMethod]
@@ -356,6 +373,8 @@ namespace Mocks.TestProject
 
         }
 
+
+        private readonly DirectoryInfo _contracts;
 
     }
 

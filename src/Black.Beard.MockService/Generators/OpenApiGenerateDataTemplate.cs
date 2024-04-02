@@ -6,10 +6,11 @@ using Microsoft.OpenApi.Models;
 using Bb.Extensions;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Expressions;
-using Bb.Http;
 
 namespace Bb.OpenApiServices
 {
+
+
 
     public class OpenApiGenerateDataTemplate : OpenApiGeneratorJsltBase
     {
@@ -42,19 +43,13 @@ namespace Bb.OpenApiServices
         {
 
             foreach (var item in ResolveResponseSchemas(self, "2"))
-            {
                 GenerateTemplate(self, item, string.Empty);
-            }
 
             //foreach (var item in ResolveResponseSchemas(self, "4"))
-            //{
             //    GenerateTemplate(self, item, "400");
-            //}
 
             //foreach (var item in ResolveResponseSchemas(self, "5"))
-            //{
             //    GenerateTemplate(self, item, "500");
-            //}
 
             return null;
 
@@ -76,12 +71,12 @@ namespace Bb.OpenApiServices
         {
 
             Stop();
-            
+
             foreach (var item in self)
                 item.Accept(this);
 
             return default;
-        
+
         }
 
         public override JsltBase VisitSchema(OpenApiSchema self)
@@ -91,173 +86,170 @@ namespace Bb.OpenApiServices
 
             if (typeName == null)
             {
-
                 if (self.Properties.Any())
                     typeName = "object";
-
                 else if (self.Items != null)
                     typeName = "array";
-
             }
 
-            if (typeName == "object")
+            switch (typeName)
             {
 
-                var required2 = this._code.CurrentBlock.Datas.GetData<bool>("required");
-                var result = new JsltObject();
+                case "object":
+                    return CreateObject(self);
 
-                foreach (var item in self.Properties)
-                {
-                    using (var current = this._code.Stack())
-                    {
-                        var required = self.Required.Select(c => c == item.Key).Any();
-                        current.Datas.SetData("required", required);
+                case "array":
+                    return CreateArray(self);
 
-                        using (var p = this.PushContext("property"))
-                        {
+                case "string":
+                    return CreateString(self);
 
-                            var value = item.Accept(this);
+                case "boolean":
+                    return new JsltFunctionCall("getrandom_boolean");
 
-                            var property = new JsltProperty()
-                            {
-                                Name = item.Key,
-                                Value = value,
-                            };
+                case "integer":
+                    return CreateInteger(self);
 
-                            result.Append(property);
-
-                        }
-                    }
-                }
-
-                return result;
-
-            }
-
-            else if (typeName == "array")
-            {
-                if (self.Items != null)
-                {
-                    var item1 = self.Items.Accept(this);
-                    var result = new JsltArray(1);
-                    result.Items.Add(item1);
-                    return result;
-                }
-                Stop();
-            }
-
-            else if (typeName == "string")
-            {
-
-                //var result = new JsltObject();
-                //var d = new JsltDirectives()
-                //    .SetCulture(CultureInfo.CurrentCulture)
-                //    .Output(c => c.SetFilter("$.value"))
-                //    ;
-                //result.Append(d);
-
-                JsltBase value = null;
-                switch (self?.Format?.ToLower() ?? string.Empty)
-                {
-
-                    case "float":
-                        value = new JsltFunctionCall("getrandom_float"
-                            , new JsltConstant(self?.Minimum, JsltKind.Float), new JsltConstant(self.ExclusiveMinimum, JsltKind.Boolean), new JsltConstant(self.Maximum, JsltKind.Integer), new JsltConstant(self.ExclusiveMaximum, JsltKind.Boolean)
-                        );
-                        break;
-
-                    case "int32":
-                        value = new JsltFunctionCall("getrandom_integer"
-                            , new JsltConstant(self?.Minimum, JsltKind.Integer), new JsltConstant(self.ExclusiveMinimum, JsltKind.Boolean), new JsltConstant(self.Maximum, JsltKind.Integer), new JsltConstant(self.ExclusiveMaximum, JsltKind.Boolean)
-                        );
-                        break;
-
-                    case "date":
-                    case "date-time":
-                        value = new JsltFunctionCall("getrandom_datatime");
-                        break;
-
-                    case "email":
-                        value = new JsltFunctionCall("getrandom_email");
-                        break;
-
-                    case "hostname":
-                        value = new JsltFunctionCall("getrandom_hostname");
-                        break;
-
-                    case "ipv4":
-                        value = new JsltFunctionCall("getrandom_ipv4");
-                        break;
-
-                    case "ipv6":
-                        value = new JsltFunctionCall("getrandom_ipv6");
-                        break;
-
-                    case "uri":
-                        value = new JsltFunctionCall("getrandom_uri");
-                        break;
-
-                    case "binary":
-                        value = new JsltFunctionCall("getrandom_binary", new JsltConstant(self.MinLength, JsltKind.Integer), new JsltConstant(self.MaxLength, JsltKind.Integer));
-                        break;
-
-                    case "password":
-                        value = new JsltFunctionCall("getrandom_password", new JsltConstant(self.MinLength, JsltKind.Integer), new JsltConstant(self.MaxLength, JsltKind.Integer));
-                        break;
-
-                    case "uuid":
-                        value = new JsltFunctionCall("uuid");
-                        break;
-
-                    default:
-                    case "":
-                        value = new JsltFunctionCall("getrandom_string"
-                           , new JsltConstant(self.MinLength, JsltKind.Integer), new JsltConstant(self.MaxLength, JsltKind.Integer)
-                           , new JsltConstant(self.Pattern, JsltKind.String)
-                        );
-                        break;
-                }
-
-                //result.Append(new JsltProperty() { Name = "value", Value = value });
-                //return result;
-                return value;
-            }
-
-            else if (typeName == "boolean")
-            {
-
-                //var result = new JsltObject();
-                //var d = new JsltDirectives()
-                //    .SetCulture(CultureInfo.CurrentCulture)
-                //    .Output(c => c.SetFilter("$.value"))
-                //    ;
-                //result.Append(d);
-                var value = new JsltFunctionCall("getrandom_boolean");
-                //result.Append(new JsltProperty() { Name = "value", Value = value });
-                //return result;
-                return value;
-            }
-
-            else if (typeName == "integer")
-            {
-
-                //var result = new JsltObject();
-                //var d = new JsltDirectives()
-                //    .SetCulture(CultureInfo.CurrentCulture)
-                //    .Output(c => c.SetFilter("$.value"))
-                //    ;
-                //result.Append(d);
-                var value = new JsltFunctionCall("getrandom_integer"
-                            , new JsltConstant(self?.Minimum, JsltKind.Integer), new JsltConstant(self.ExclusiveMinimum, JsltKind.Boolean), new JsltConstant(self.Maximum, JsltKind.Integer), new JsltConstant(self.ExclusiveMaximum, JsltKind.Boolean)
-                        );
-                //result.Append(new JsltProperty() { Name = "value", Value = value });
-                //return result;
-                return value;
+                default:
+                    break;
             }
 
             Stop();
             throw new NotImplementedException();
 
+        }
+
+        private static JsltBase CreateInteger(OpenApiSchema self)
+        {
+            return new JsltFunctionCall("getrandom_integer",
+                        new JsltConstant(self?.Minimum, JsltKind.Integer),
+                        new JsltConstant(self.ExclusiveMinimum, JsltKind.Boolean),
+                        new JsltConstant(self.Maximum, JsltKind.Integer),
+                        new JsltConstant(self.ExclusiveMaximum, JsltKind.Boolean)
+                    );
+        }
+
+        private JsltBase CreateArray(OpenApiSchema self)
+        {
+            var result = new JsltArray(1);
+            var datas = Context.GetDataFor(self);
+            var s = datas.GetData<string>("source");
+            if (!string.IsNullOrEmpty(s))
+                result.Source =  s.AsJsltVariable();
+
+            if (self.Items != null)
+            {
+                var item1 = self.Items.Accept(this);
+                result.Items.Add(item1);
+            }
+            else
+                result.Items.Add(new JsltObject());
+            return result;
+        }
+
+        private JsltBase CreateString(OpenApiSchema self)
+        {
+
+            JsltBase value = null;
+            switch (self?.Format?.ToLower() ?? string.Empty)
+            {
+
+                case "float":
+                    return new JsltFunctionCall("getrandom_float",
+                            new JsltConstant(self?.Minimum, JsltKind.Float),
+                            new JsltConstant(self.ExclusiveMinimum, JsltKind.Boolean),
+                            new JsltConstant(self.Maximum, JsltKind.Integer),
+                            new JsltConstant(self.ExclusiveMaximum, JsltKind.Boolean)
+                        );
+
+                case "int32":
+                    return new JsltFunctionCall("getrandom_integer",
+                            new JsltConstant(self?.Minimum, JsltKind.Integer),
+                            new JsltConstant(self.ExclusiveMinimum, JsltKind.Boolean),
+                            new JsltConstant(self.Maximum, JsltKind.Integer),
+                            new JsltConstant(self.ExclusiveMaximum, JsltKind.Boolean)
+                        );
+
+                case "date":
+                case "date-time":
+                    return new JsltFunctionCall("getrandom_datatime");
+
+                case "email":
+                    return new JsltFunctionCall("getrandom_email");
+
+                case "hostname":
+                    return new JsltFunctionCall("getrandom_hostname");
+
+                case "ipv4":
+                    return new JsltFunctionCall("getrandom_ipv4");
+
+                case "ipv6":
+                    return new JsltFunctionCall("getrandom_ipv6");
+
+                case "uri":
+                    return new JsltFunctionCall("getrandom_uri");
+
+                case "binary":
+                    return new JsltFunctionCall("getrandom_binary",
+                            new JsltConstant(self.MinLength, JsltKind.Integer),
+                            new JsltConstant(self.MaxLength, JsltKind.Integer));
+
+                case "password":
+                    return new JsltFunctionCall("getrandom_password",
+                            new JsltConstant(self.MinLength, JsltKind.Integer),
+                            new JsltConstant(self.MaxLength, JsltKind.Integer));
+
+                case "uuid":
+                    return new JsltFunctionCall("uuid");
+
+                default:
+                case "":
+                    return new JsltFunctionCall("getrandom_string",
+                            new JsltConstant(self.MinLength, JsltKind.Integer),
+                            new JsltConstant(self.MaxLength, JsltKind.Integer),
+                            new JsltConstant(self.Pattern, JsltKind.String)
+                        );
+            }
+
+        }
+
+        private JsltObject CreateObject(OpenApiSchema self)
+        {
+            var required2 = this._code.CurrentBlock.Datas.GetData<bool>("required");
+            var result = new JsltObject();
+
+            foreach (var item in self.Properties)
+            {
+                using (var current = this._code.Stack())
+                {
+                    var required = self.Required.Select(c => c == item.Key).Any();
+                    current.Datas.SetData("required", required);
+
+                    using (var p = this.PushContext("property"))
+                    {
+
+                        JsltBase? value;
+
+                        var datas = Context.GetDataFor(item.Value);
+                        var s = datas.GetData<string>("path");
+                        if (!string.IsNullOrEmpty(s))
+                            value = s.AsJsltPath();
+                        else
+                            value = item.Accept(this);
+
+                        var property = new JsltProperty()
+                        {
+                            Name = item.Key,
+                            Value = value,
+                        };
+
+                        result.Append(property);
+
+                    }
+                }
+            }
+
+            return result;
         }
 
         public JsltBase VisitSchema2(OpenApiSchema self)
@@ -474,7 +466,7 @@ namespace Bb.OpenApiServices
             Stop();
             throw new NotImplementedException();
 
-        }              
+        }
 
         public override JsltBase VisitParameter(OpenApiParameter self)
         {
@@ -486,7 +478,7 @@ namespace Bb.OpenApiServices
         {
             Stop();
             throw new NotImplementedException();
-        }               
+        }
 
         public override JsltBase VisitComponents(OpenApiComponents self)
         {
@@ -498,7 +490,7 @@ namespace Bb.OpenApiServices
         {
             Stop();
             throw new NotImplementedException();
-        }               
+        }
 
         public override JsltBase VisitSecurityRequirement(OpenApiSecurityRequirement self)
         {
@@ -630,7 +622,7 @@ namespace Bb.OpenApiServices
             //    GenerateTemplate(value, item, "500");
 
             return null;
-        
+
         }
 
         public override JsltBase? VisitOperations(IDictionary<OperationType, OpenApiOperation> self)
@@ -799,7 +791,7 @@ namespace Bb.OpenApiServices
             public OpenApiSchema Schema { get; internal set; }
             public string Kind { get; internal set; }
         }
-        
+
         private IEnumerable<Response> ResolveResponseSchemas(OpenApiOperation self, string code)
         {
 

@@ -140,7 +140,6 @@ namespace Mocks.TestProject
 
         }
 
-
         [TestMethod]
         public void Contract2CallSuccessful()
         {
@@ -188,6 +187,52 @@ namespace Mocks.TestProject
 
         }
 
+        [TestMethod]
+        public void Contract3()
+        {
+
+            int code = 0;
+            var file = _contracts.GetFiles("contract3.yaml").First().FullName;
+            string contract = "contract3";
+            string host = "localhost";
+            int port = 5000;
+            using (var service = Program.GetService(new string[] { })
+                .AddLocalhostUrlWithDynamicPort("http", host, ref port)
+                .Start(true)
+                )
+            {
+
+                CurlInterpreter cmd = $"curl " +
+                    $"-X 'POST' 'http://{host}:{port}/Mock/{contract}/upload' " +
+                    $"-H 'accept: */*' " +
+                    $"-H 'Content-Type: multipart/form-data' " +
+                    $"-F 'upfile=@{file};type=application/json'";
+                var p = cmd.ResultToString(false);
+
+                if (cmd.LastResponse.IsSuccessStatusCode)
+                {
+
+                    CurlInterpreter cmd2 = $"curl " +
+                        $"-X POST 'http://{host}:{port}/proxy/{contract}/v43' " +
+                        $"-H 'accept: application/json' " +
+                        "-d '[ { \"key\": \"key1\" }, { \"key\": \"key2\" } ]' ";
+
+                    p = cmd2.ResultToString();
+
+                    code = cmd2.LastResponse.StatusCode;
+                }
+
+
+                cmd = $"curl " +
+                    $"-X 'POST' 'http://{host}:{port}/Mock/{contract}/clean' " +
+                    $"-H 'accept: */*' ";
+                var p2 = cmd.ResultToString(false);
+
+                Assert.AreEqual(code, 200);
+
+            }
+
+        }
         private DirectoryInfo _contracts;
 
     }

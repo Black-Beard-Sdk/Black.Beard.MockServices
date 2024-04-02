@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Black.Beard.Helpers" Version="2.0.32" />
-    <PackageReference Include="Black.Beard.Http" Version="1.0.20" />
+    <PackageReference Include="Black.Beard.Http" Version="1.0.21" />
     <PackageReference Include="Black.Beard.Web.Server" Version="1.0.17" />
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\sdk.net\src\Black.Beard.Http\Black.Beard.Http.csproj" />
     <ProjectReference Include="..\Black.Beard.MockService\Black.Beard.MockService.csproj" />
   </ItemGroup>
 
@@ -32,6 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Contracts\contract3.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Contracts\contract2.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
