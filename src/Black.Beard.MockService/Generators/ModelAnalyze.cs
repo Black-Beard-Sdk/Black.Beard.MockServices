@@ -50,10 +50,17 @@ namespace Bb.OpenApiServices
             // create layers
             Dictionary<string, Layer> responses = new Dictionary<string, Layer>();
             List<Layer> parameters = (List<Layer>)self.Parameters.Accept(this);
-            parameters.Add((Layer)self.RequestBody?.Accept(this));
-            foreach (var item in self.Responses)
-                responses.Add(item.Key, (Layer)item.Value.Accept(this));
 
+            var o = self.RequestBody?.Accept(this);
+            if (o != null)
+                parameters.Add((Layer)o);
+
+            foreach (var item in self.Responses)
+            {
+                o = item.Value.Accept(this);
+                if (o != null)
+                    responses.Add(item.Key,(Layer) o);
+            }
             foreach (var response in responses)
                 foreach (var parameter in parameters)
                     parameter.Evaluate(response.Value, _ctx);
