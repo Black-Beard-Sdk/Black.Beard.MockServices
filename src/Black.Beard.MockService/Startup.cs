@@ -34,7 +34,7 @@ namespace Bb.MockService
                 root = "c:\\".Combine("tmp", "mocks");
 
             else
-                root = "tmp".Combine("mocks");
+                root = Path.DirectorySeparatorChar + "tmp".Combine("mocks");
 
             GlobalConfiguration.CurrentDirectoryToWriteGenerators = root.Combine("contracts");
             GlobalConfiguration.DirectoryToTrace = root.Combine("logs");
