@@ -82,6 +82,13 @@ namespace Mocks.TestProject
 
                     p = cmd2.ResultToString();
 
+#if DEBUG
+                    if (!cmd2.LastResponse.IsSuccessStatusCode)
+                    {
+                        // LocalDebug.Stop();
+                    }
+#endif
+
                 }
 
                 cmd = $"curl " +
@@ -233,6 +240,11 @@ namespace Mocks.TestProject
             }
 
         }
+        
+        
+        
+        
+        
         private DirectoryInfo _contracts;
 
     }

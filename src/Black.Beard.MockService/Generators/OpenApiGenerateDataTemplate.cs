@@ -131,19 +131,22 @@ namespace Bb.OpenApiServices
 
         private JsltBase CreateArray(OpenApiSchema self)
         {
+
             var result = new JsltArray(1);
             var datas = Context.GetDataFor(self);
             var s = datas.GetData<string>("source");
-            if (!string.IsNullOrEmpty(s))
-                result.Source =  s.AsJsltVariable();
 
+
+            JsltBase itemToAdd;
             if (self.Items != null)
-            {
-                var item1 = self.Items.Accept(this);
-                result.Items.Add(item1);
-            }
+                itemToAdd = self.Items.Accept(this);
             else
-                result.Items.Add(new JsltObject());
+                itemToAdd = new JsltObject();
+            if (!string.IsNullOrEmpty(s))
+                itemToAdd.Source = s.AsJsltVariable();
+            result.Items.Add(itemToAdd);
+
+            
             return result;
         }
 

@@ -2,17 +2,11 @@
 using Bb.Codings;
 using Microsoft.OpenApi.Extensions;
 using Bb.Extensions;
-using Bb.OpenApi;
 using Bb.OpenApiServices;
 using Bb.Services.Chain;
 using Bb.Services.Managers;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Expressions;
-using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Validations;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Reflection;
 
 namespace Bb.Services
@@ -215,10 +209,8 @@ namespace Bb.Services
             if (ctx.Diagnostics.Success)
             {
 
-
                 var a = new ModelAnalyze(ctx);
                 a.VisitDocument(_document);
-
 
                 new ServiceGeneratorProcess<OpenApiDocument>(ctx)
                     .Append(new OpenApiGenerateDataTemplate())
@@ -226,7 +218,6 @@ namespace Bb.Services
 
                 var generator = new OpenApiHttpListenerBuilder();
                 generator.Parse(_document, ctx);
-
 
                 if (_index.Exists)
                 {
@@ -244,10 +235,6 @@ namespace Bb.Services
 
                 return generator.Result;
 
-            }
-            else
-            {
-                
             }
 
             return null;

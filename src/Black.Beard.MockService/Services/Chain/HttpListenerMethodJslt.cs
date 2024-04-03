@@ -1,5 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 using System;
+using System.Diagnostics;
 
 namespace Bb.Services.Chain
 {
@@ -15,7 +16,7 @@ namespace Bb.Services.Chain
 
         public override async Task InvokeAsync(HttpListenerContext context)
         {
-
+            string datas = null;
             await base.InvokeAsync(context);
 
             if (context.Context.Response.StatusCode != 0 && context.Context.Response.StatusCode != 200)
@@ -23,13 +24,25 @@ namespace Bb.Services.Chain
 
             bool withDebug = false;
 
-            var dic = new Dictionary<string, Oldtonsoft.Json.Linq.JToken>();
-            context.Arguments().ToList().ForEach(c => dic.Add(c.Key, Oldtonsoft.Json.Linq.JToken.FromObject(c.Value)));
+            var dic = new Dictionary<string, object>();
+            context.Arguments().ToList().ForEach(c => dic.Add(c.Key, c.Value));
 
             if (context.Body != null)
-                dic.Add("body", Oldtonsoft.Json.Linq.JToken.FromObject(context.Body));
+                dic.Add("body", context.Body);
 
-            var datas = context.GetDatas(this._templateFileName, withDebug, dic);
+            var diag = new Analysis.DiagTraces.ScriptDiagnostics();
+
+            try
+            {
+                datas = context.GetDatas(this._templateFileName, withDebug, dic, diag);
+            }
+            catch (Exception ex)
+            {
+                LocalDebug.Stop();
+                context.Context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                await context.Context.Response.WriteAsync(ex.ToString());
+                return;
+            }
 
             context.Context.Response.StatusCode = StatusCodes.Status200OK;
             await context.Context.Response.WriteAsync(datas);

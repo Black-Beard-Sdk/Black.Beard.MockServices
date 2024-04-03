@@ -34,35 +34,23 @@ Arguments
 - **url** address of the docker container
 - **contract name** : custom name you want to give to yours service
 - **contract file** openApi v3.\* contract
+for this test the file to upload is named swagger.json.
 
 ### Upload the contract on the service
 ```batch
    curl -X POST "https://localhost:80/Manager/mock/{contract name}/upload" -H "accept: */*" -H "Content-Type: multipart/form-data" -F "upfile=@swagger.json;type=application/json"
 ```
 
-for this test the file to upload is named swagger.json.
-
-
-### Launch the new mocked service
+### uses the service mock
 ```batch
-   curl -X PUT "https://{url}:80/Manager/mock/{contract name}/run" -H "accept: */*"
-```
-
-### Stop the service
-```batch
-   curl -X PUT "https://{url}:80/Manager/mock/{contract name}/kill" -H "accept: */*"
+    The available url to consume your service is
+    "https://localhost:80/Manager/proxy/{contract name}/{your path in the contract}"
 ```
 
 ### Fetch the list of mock template uploaded.
 ```batch
-   curl -X GET "https://{url}:80/Manager/mock" -H "accept: application/json"
+   explorer.exe "https://localhost:80/www/index.html"
 ```
-
-### Fetch the list of mock template launched.
-```batch
-   curl -X GET "https://{url}:80/Manager/mock/runnings" -H "accept: application/json"
-```
-
 
 # How to test on windows
 
@@ -70,7 +58,7 @@ Source : https://learn.microsoft.com/en-us/windows/wsl/install
 
 for install a linux virtual machine
 ```batch
-wsl --install -d Ubuntu
+    wsl --install -d Ubuntu
 ```
 
 Now we need to install Docker

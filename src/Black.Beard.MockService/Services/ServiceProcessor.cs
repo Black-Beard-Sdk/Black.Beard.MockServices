@@ -1,11 +1,25 @@
 ﻿using Bb.Analysis.DiagTraces;
+using Bb.Contracts;
 using Bb.Json.Jslt.Services;
+using Oldtonsoft.Json.Linq;
 using System.Text;
 
 namespace Bb.Services.Managers
 {
     public class ServiceProcessor
     {
+
+        static ServiceProcessor()
+        {
+
+            Bb.Json.Jslt.Services.VariableResolver.Intercept = VariableInterceptor;
+
+        }
+
+        private static void VariableInterceptor(IVariableResolver resolver, string key, bool status, object valueResolved)
+        {
+
+        }
 
         public ServiceProcessor(string? sourceDirectory = null)
         {
@@ -16,17 +30,16 @@ namespace Bb.Services.Managers
                 OutputPath = sourceDirectory ?? Environment.CurrentDirectory,
             };
 
-            _templateprovider = new TemplateTransformProvider(configuration);
+            _templateprovider = new TemplateProvider(configuration);
             _templates = new Dictionary<string, JsltTemplate>();
             _templateDebugs = new Dictionary<string, JsltTemplate>();
 
         }
 
-        public string GetDatas(string templateFile, bool withDebug, IDictionary<string, Oldtonsoft.Json.Linq.JToken> variables, ScriptDiagnostics diagnostics)
+        public string GetDatas(string templateFile, bool withDebug, IDictionary<string, object> variables, ScriptDiagnostics diagnostics)
         {
 
             Oldtonsoft.Json.Linq.JToken result = default;
-
 
             // load mocked datas from file source
             // Create the sources object with the primary source of data and datas argument of the service
@@ -35,7 +48,17 @@ namespace Bb.Services.Managers
             var source = SourceJson.GetEmpty();
             var src = new Sources(source);
             if (variables != null)
-                src.Variables.Add(variables);
+            {
+
+                foreach (var item in variables)
+                {
+                    var value = VariableConverterExtension.Convert(item.Value);
+                    src.Variables.Add(item.Key, value);
+                }
+
+
+                
+            }
 
             JsltTemplate template = GetTemplate(templateFile, withDebug, diagnostics);
 
@@ -77,16 +100,120 @@ namespace Bb.Services.Managers
                             _t.Add(key, template);
 
                     }
-                     
+
             return template;
         }
 
 
         //private readonly Oldtonsoft.Json.JsonSerializer _serializer;
-        private readonly TemplateTransformProvider _templateprovider;
+        private readonly TemplateProvider _templateprovider;
         private readonly Dictionary<string, JsltTemplate> _templates;
         private readonly Dictionary<string, JsltTemplate> _templateDebugs;
         private volatile object _lock = new object();
     }
+
+
+
+    public static class VariableConverterExtension
+    {
+
+
+        static VariableConverterExtension()
+        {
+            _hvalues = new HashSet<Type>()
+            {
+                typeof(string),
+                typeof(Uri),
+                typeof(Guid),
+                typeof(Byte),
+                typeof(Byte[]),
+                typeof(bool),
+                typeof(double),
+                typeof(float),
+                typeof(long),
+                typeof(ulong),
+                typeof(int),
+                typeof(uint),
+                typeof(short),
+                typeof(ushort),
+                typeof(DateTime),
+                typeof(TimeSpan),
+            };
+        }
+
+
+
+        public static bool ConvertToJvalue(ref object value)
+        {
+
+            if (_hvalues.Contains(value.GetType()))
+            {
+
+                if (value is string s)
+                {
+                    value = JToken.Parse(s);
+                    return true;
+                }
+
+                value = new JValue(value);
+                return true;
+
+            }
+
+            return false;
+
+        }
+
+
+
+        public static object Convert(this object value)
+        {
+
+            if (value == null)
+                return null;
+
+            if (ConvertToJvalue(ref value))
+                return value;
+
+            if (value is JToken token)
+            {
+
+                if (value is JValue jv)
+                {
+                    var jc = jv.Value;
+                    if (ConvertToJvalue(ref jc))
+                        return jc;
+                }
+
+                if (value is JArray ja)
+                {
+
+                    var jc = new JArray();
+                    foreach (var item in ja)
+                    {
+                        var i2 = item.Convert();
+                        jc.Add(i2);
+                    }
+
+                    return jc;
+                }
+
+                var i = token.ToString();
+                value = JToken.Parse(i);
+
+                return value;
+
+            }
+
+            var vo = JToken.FromObject(value);
+            return vo;
+
+        }
+
+
+        private static HashSet<Type> _hvalues;
+
+    }
+
 
 }

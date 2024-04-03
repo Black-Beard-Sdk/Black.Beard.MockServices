@@ -1,5 +1,6 @@
 ﻿
 
+using Bb.Analysis.DiagTraces;
 using Bb.Expressions;
 using Bb.Services.Managers;
 using System.Text;
@@ -46,20 +47,10 @@ namespace Bb.Services.Chain
                 this._arguments.Add(name, argument);
         }
 
-        internal string GetDatas(string templateFileName, bool withDebug, IDictionary<string, Oldtonsoft.Json.Linq.JToken> variables)
+        internal string GetDatas(string templateFileName, bool withDebug, IDictionary<string, object> variables, ScriptDiagnostics diag)
         {
-
-            var diag = new Analysis.DiagTraces.ScriptDiagnostics();
-
-            var reuslt = _processor.GetDatas(templateFileName, withDebug, variables, diag);
-
-            if (!diag.Success)
-            {
-
-            }
-
-            return reuslt;
-
+            var result = _processor.GetDatas(templateFileName, withDebug, variables, diag);
+            return result;
         }
 
         internal void Diagnostic(string log)

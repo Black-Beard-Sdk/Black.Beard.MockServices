@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  description: contract5
+  version: 5.0.0
+  title: Test get
+servers:
+- url: https://beard.cool
+  description: Main server
+paths:
+  "/v43":
+    post:    
+      summary: Contract 5
+      description: Defines a contract.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              items: 
+               "$ref": "#/components/schemas/Item"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ItemResult"
+components:
+  schemas:
+    Item:
+      type: object      
+      properties:
+        key:
+          type: string              
+    ItemResult:
+      type: object      
+      properties:
+        key:
+          type: string                 
+ 

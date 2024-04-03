@@ -11,10 +11,19 @@ using System.Text.Json.Nodes;
 
 namespace Bb.Services.Chain
 {
+
+    /// <summary>
+    /// Chain part that manage the body of the request
+    /// </summary>
     public class HttpListenerBodyParameter : HttpListenerParameter
     {
 
-
+        /// <summary>
+        /// initialize a new instance of <see cref="HttpListenerBodyParameter"/>
+        /// </summary>
+        /// <param name="required"></param>
+        /// <param name="type"></param>
+        /// <param name="schema"></param>
         public HttpListenerBodyParameter(bool required, Type? type = null, JsonSchema? schema = null)
             : base("body", required)
         {

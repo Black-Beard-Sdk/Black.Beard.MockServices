@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  description: contract4
+  version: 3.0.0
+  title: Test get
+servers:
+- url: https://beard.cool
+  description: Main server
+paths:
+  "/v43/{key}":
+    get:    
+      summary: Contract 4
+      description: Defines a contract.
+      parameters:
+        - in: path
+          name: key
+          schema:
+            type: string
+          required: true
+          description: id key
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Response200"
+components:
+  schemas:
+    Response200:
+      type: object      
+      properties:
+        key:
+          type: string
+        value:
+          type: string
