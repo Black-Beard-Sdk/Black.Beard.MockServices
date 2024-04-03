@@ -49,7 +49,7 @@ namespace Bb.MockService
 
             base.ConfigureServices(services);
 
-            // services.AddDirectoryBrowser();
+            services.AddDirectoryBrowser();
 
         }
 
