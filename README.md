@@ -18,7 +18,7 @@ Or in interactive mode
     sudo docker run -p 80:8080 -it --entrypoint /bin/bash blackbeardteam/mock
 
 -- launch the server
-    dotnet Black.Beard.ParrotServices.dll
+    dotnet Black.Beard.MockService.dll
 ```
 
 Launch a navigator and open the swagger page

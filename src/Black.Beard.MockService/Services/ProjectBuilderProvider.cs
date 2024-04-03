@@ -49,11 +49,13 @@ namespace Bb.Services.Managers
         public virtual void Initialize(string pathRoot)
         {
             _root = pathRoot;
-
             var rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
             var redoc = rootWww.Combine("www", "scripts", "redoc.standalone.js").AsFile();
+            this._logger.LogInformation($"copy of file {redoc} to {_root}");
             if (!redoc.Exists)
-            redoc.CopyToDirectory(_root);
+            {
+                redoc.CopyToDirectory(_root);
+            }
 
         }
 
