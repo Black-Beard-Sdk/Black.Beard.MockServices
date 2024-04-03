@@ -38,7 +38,7 @@ namespace Bb.Services.Managers
             // services.GetKeyedService<Option<Configuration>>(Constants.Models.Configuration);
 
             Initialize(GlobalConfiguration.CurrentDirectoryToWriteGenerators);
-        
+
         }
 
 
@@ -52,13 +52,20 @@ namespace Bb.Services.Managers
             var rootWww = Assembly.GetExecutingAssembly().Location.AsFile().Directory;
             var redoc = rootWww.Combine("www", "scripts", "redoc.standalone.js").AsFile();
             this._logger.LogInformation($"copy of file {redoc} to {_root}");
-            if (!redoc.Exists)
-            {
-                redoc.CopyToDirectory(_root);
-            }
+
+            var targetFile = BuildTargetFile(redoc, _root);
+            targetFile.Refresh();
+            if (!targetFile.Exists)
+                if (!redoc.CopyToDirectory(_root, false))
+                    this._logger.LogError($"Failed to copy file {redoc} to {_root}");
 
         }
 
+
+        public static FileInfo BuildTargetFile(FileInfo sourceFilePath, string directoryTargetPath)
+        {
+            return directoryTargetPath.Combine(sourceFilePath.Name).AsFile();
+        }
 
 
         /// <summary>
@@ -100,7 +107,7 @@ namespace Bb.Services.Managers
             if (!_items.TryGetValue(contractName, out var builder))
                 lock (_lock)
                     if (!_items.TryGetValue(contractName, out builder))
-                            _items.Add(contractName, builder = new ProjectBuilderContract(this, contractName, true));
+                        _items.Add(contractName, builder = new ProjectBuilderContract(this, contractName, true));
 
             return builder;
 
@@ -129,7 +136,7 @@ namespace Bb.Services.Managers
         }
 
         /// <summary>
-        /// Return the list of Html contract index.
+        /// Return the list of html contract index.
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetItems()

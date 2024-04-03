@@ -32,7 +32,6 @@ namespace Bb.MockService
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 root = "c:\\".Combine("tmp", "mocks");
-
             else
                 root = Path.DirectorySeparatorChar + "tmp".Combine("mocks");
 
@@ -44,11 +43,7 @@ namespace Bb.MockService
 
             GlobalConfiguration.DirectoryToTrace += Path.DirectorySeparatorChar;
 
-            //Trace.TraceInformation("setting directory to generate projects in : " + Configuration.CurrentDirectoryToWriteProjects);
-            Trace.TraceInformation("setting directory to output logs : " + GlobalConfiguration.DirectoryToTrace);
-
             base.ConfigureServices(services);
-
             services.AddDirectoryBrowser();
 
         }
@@ -71,6 +66,12 @@ namespace Bb.MockService
         /// <param name="loggerFactory">The logger factory.</param>
         public override void ConfigureApplication(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+
+            var logger = loggerFactory.CreateLogger<Startup>();
+            
+            logger.LogInformation("setting directory data stores  : " + GlobalConfiguration.CurrentDirectoryToWriteGenerators);
+            logger.LogInformation("setting directory output logs : " + GlobalConfiguration.DirectoryToTrace);
+
 
             base.ConfigureApplication(app, env, loggerFactory);
 
