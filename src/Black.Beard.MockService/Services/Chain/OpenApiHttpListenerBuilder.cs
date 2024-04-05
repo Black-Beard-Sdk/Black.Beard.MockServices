@@ -357,8 +357,13 @@ namespace Bb.Services.Chain
             }
             else if (self.Type == "object")
             {
-                Stop();
-                name = self.Reference.Id;
+                
+                if (self.Reference != null)
+                    name = self.Reference.Id;
+
+                else if (self.Items.Reference != null)
+                    name = self.Items.Reference.Id;
+
                 definitions = OpenApiExtension.GetSchemaObjects(_document, name, out root);
                 schema = CopySchema(self, name, suffix);
             }

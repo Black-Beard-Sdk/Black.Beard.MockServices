@@ -34,3 +34,4 @@ components:
           type: string
         value:
           type: string
+          minLength: 5

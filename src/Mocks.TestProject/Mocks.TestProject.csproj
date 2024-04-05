@@ -11,18 +11,18 @@
 
   <ItemGroup>
     <PackageReference Include="Black.Beard.Helpers" Version="2.0.32" />
-    <PackageReference Include="Black.Beard.Http" Version="1.0.21" />
     <PackageReference Include="Black.Beard.Web.Server" Version="1.0.17" />
     <PackageReference Include="coverlet.collector" Version="6.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.2.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.2.2" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.3.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.3.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\sdk.net\src\Black.Beard.Http\Black.Beard.Http.csproj" />
     <ProjectReference Include="..\Black.Beard.MockService\Black.Beard.MockService.csproj" />
   </ItemGroup>
 
@@ -34,7 +34,7 @@
     <None Update="Contracts\contract5.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Contracts\contract4 .yaml">
+    <None Update="Contracts\contract4.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Contracts\contract3.yaml">

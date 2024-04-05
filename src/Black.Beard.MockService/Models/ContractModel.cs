@@ -10,11 +10,14 @@ namespace Bb.Models
         {
             Diagnostic = new List<Diagnostic>();
             Templates = new List<string>();
-        }
+            Curls = new List<string>();
+         }
 
         public List<Diagnostic> Diagnostic { get; set; }
 
         public List<string> Templates { get; set; }
+
+        public List<string> Curls { get; set; }
 
     }
 

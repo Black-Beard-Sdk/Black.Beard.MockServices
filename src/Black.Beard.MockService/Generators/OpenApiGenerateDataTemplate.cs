@@ -146,7 +146,7 @@ namespace Bb.OpenApiServices
                 itemToAdd.Source = s.AsJsltVariable();
             result.Items.Add(itemToAdd);
 
-            
+
             return result;
         }
 
@@ -231,13 +231,14 @@ namespace Bb.OpenApiServices
                     using (var p = this.PushContext("property"))
                     {
 
-                        JsltBase? value;
+                        JsltBase? value = null;
 
                         var datas = Context.GetDataFor(item.Value);
                         var s = datas.GetData<string>("path");
                         if (!string.IsNullOrEmpty(s))
-                            value = s.AsJsltPath();
-                        else
+                            value = JsltBase.Evaluate(s);
+
+                        if (value == null)
                             value = item.Accept(this);
 
                         var property = new JsltProperty()

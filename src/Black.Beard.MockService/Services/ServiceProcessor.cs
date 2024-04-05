@@ -55,8 +55,6 @@ namespace Bb.Services.Managers
                     var value = VariableConverterExtension.Convert(item.Value);
                     src.Variables.Add(item.Key, value);
                 }
-
-
                 
             }
 
@@ -70,7 +68,7 @@ namespace Bb.Services.Managers
                     var payload = ctx.TokenResult;
                     result = payload;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     throw;
                 }
@@ -151,7 +149,12 @@ namespace Bb.Services.Managers
 
                 if (value is string s)
                 {
-                    value = JToken.Parse(s);
+                    var c = s[0];
+
+                    if (c == '{' || c == '[')
+                        value = JToken.Parse(s);
+                    else
+                        value = new JValue(value);
                     return true;
                 }
 

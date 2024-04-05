@@ -8,6 +8,7 @@ using Bb.Services.Managers;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Validations;
 using System.Reflection;
+using System.Text;
 
 namespace Bb.Services
 {
@@ -219,11 +220,23 @@ namespace Bb.Services
                 var generator = new OpenApiHttpListenerBuilder();
                 generator.Parse(_document, ctx);
 
+                var curlGenerators = new CurlGenerator(ctx, "Proxy", this.ContractName);
+                curlGenerators.VisitDocument(_document);
+                this.Curls = curlGenerators.Urls;
+
                 if (_index.Exists)
                 {
+                    //StringBuilder sb = new StringBuilder();
+                    //foreach (var item in curls)
+                    //{
+                    //    sb.Append("<Div>");
+                    //    sb.Append(item.ToString());
+                    //    sb.Append("</Div>");
+                    //}
+
                     var content = _index.LoadFromFile()
                         .Replace("{{path}}", @".\" + Path.GetFileName(_templateFilename))
-
+                        //.Replace("{{curls}}", sb.ToString())
                         ;
                     var indexTarget = Root.Combine("index.html").AsFile();
 
@@ -268,6 +281,7 @@ namespace Bb.Services
         /// The parent.
         /// </value>
         public ProjectBuilderProvider Parent { get; }
+        public List<StringBuilder> Curls { get; private set; }
 
         internal readonly ILogger<ProjectBuilderProvider> _logger;
         private volatile object _lock = new object();

@@ -9,8 +9,6 @@ using Microsoft.OpenApi.Models;
 namespace Bb.OpenApiServices
 {
 
-
-
     public class ModelAnalyze : OpenApiGenericVisitor<Object>
     {
 
@@ -59,7 +57,7 @@ namespace Bb.OpenApiServices
             {
                 o = item.Value.Accept(this);
                 if (o != null)
-                    responses.Add(item.Key,(Layer) o);
+                    responses.Add(item.Key, (Layer)o);
             }
             foreach (var response in responses)
                 foreach (var parameter in parameters)
@@ -121,7 +119,6 @@ namespace Bb.OpenApiServices
 
         public override object? VisitParameter(OpenApiParameter self)
         {
-            Stop();
             var layer = new Layer()
             {
                 Name = self.Name,
@@ -129,7 +126,7 @@ namespace Bb.OpenApiServices
                 Instance = self,
                 Source = self.In.ToString(),
             };
-           
+
             return layer;
         }
 
@@ -143,8 +140,8 @@ namespace Bb.OpenApiServices
         {
 
             string? typeName = ResolveTypeName(self);
-            var layer = new Layer() 
-            { 
+            var layer = new Layer()
+            {
                 Type = typeName,
                 Instance = self,
             };
@@ -164,11 +161,24 @@ namespace Bb.OpenApiServices
                 {
 
                     case "object":
-                        if (self.Reference != null)
-                            layer.Name = self.Reference.Id;
+                        OpenApiReference reference = null;
+                        var s = self;
+                        if (s.Reference != null)
+                        {
+                            reference = s.Reference;
+                        }
+                        else if (s.Items.Reference != null)
+                        {
+                            s = self.Items;
+                            reference = s.Reference;
+                        }
+
+                        if (reference != null)
+                            layer.Name = reference.Id;
                         else
                             layer.Name = "Noname";
-                        foreach (var item in self.Properties)
+
+                        foreach (var item in s.Properties)
                         {
                             var l = (Layer)item.Accept(this);
                             l.Name = item.Key;

@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Black.Beard.MockService", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mocks.TestProject", "Mocks.TestProject\Mocks.TestProject.csproj", "{590BCB93-4869-44F3-AFFA-32F14629136E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Black.Beard.Http", "..\..\sdk.net\src\Black.Beard.Http\Black.Beard.Http.csproj", "{7065F2CC-98AB-4E39-8E16-54004AB79611}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{590BCB93-4869-44F3-AFFA-32F14629136E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{590BCB93-4869-44F3-AFFA-32F14629136E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{590BCB93-4869-44F3-AFFA-32F14629136E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7065F2CC-98AB-4E39-8E16-54004AB79611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7065F2CC-98AB-4E39-8E16-54004AB79611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7065F2CC-98AB-4E39-8E16-54004AB79611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7065F2CC-98AB-4E39-8E16-54004AB79611}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

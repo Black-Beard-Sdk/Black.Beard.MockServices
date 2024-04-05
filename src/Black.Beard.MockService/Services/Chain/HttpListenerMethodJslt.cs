@@ -25,7 +25,8 @@ namespace Bb.Services.Chain
             bool withDebug = false;
 
             var dic = new Dictionary<string, object>();
-            context.Arguments().ToList().ForEach(c => dic.Add(c.Key, c.Value));
+            foreach (var item in context.Arguments())
+                dic.Add(item.Key, item.Value);
 
             if (context.Body != null)
                 dic.Add("body", context.Body);

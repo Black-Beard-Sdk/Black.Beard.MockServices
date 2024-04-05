@@ -98,7 +98,7 @@ namespace Bb.OpenApiServices
             for (int i = 0; i < right._layers.Count; i++)
             {
 
-                var cLeft = left.Children[0];
+                var cLeft = left.Children[i];
                 var cRight = right.Children.FirstOrDefault(c => c.Name == cLeft.Name);
                 if (cRight != null)
                 {
@@ -120,6 +120,29 @@ namespace Bb.OpenApiServices
 
         }
 
+        public static bool EvaluateParameterToObject(ContextGenerator ctx, Layer left, Layer right)
+        {
+
+            for (int i = 0; i < right._layers.Count; i++)
+            {
+
+                //var cLeft = left.Children[0];
+                var cRight = right.Children.FirstOrDefault(c => c.Name == left.Name);
+                if (cRight != null)
+                {
+                    var datas = ctx.GetDataFor(cRight.Instance);
+                    var path = "@" + left.Name;
+                    datas.SetData("path", path);
+                    return true;
+
+                }
+
+            }
+
+            return false;
+
+        }
+
         private static string ResolvePath(IOpenApiElement instance)
         {
 
@@ -129,13 +152,11 @@ namespace Bb.OpenApiServices
                     return string.Join('/', s.Reference.ReferenceV3.Split('/').Skip(3));
 
                 else if (s.Items != null)
-                {
-                    Stop();
                     return ResolvePath(s.Items);
-                }
 
                 else if (s.Properties != null)
                 {
+
                     Stop();
 
                 }
@@ -159,11 +180,11 @@ namespace Bb.OpenApiServices
             }
 
             else if (this.Type == "object" && right.Type == "object")
-            {
-                Stop();
                 EvaluateObject(ctx, this, right);
-            }
-
+            
+            else if (this.Type == "string" && right.Type == "object")
+                EvaluateParameterToObject(ctx, this, right);
+        
         }
 
 

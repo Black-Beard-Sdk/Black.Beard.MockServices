@@ -6,6 +6,7 @@ using Bb.Servers.Exceptions;
 using Bb.OpenApiServices;
 using Bb.Models;
 using Bb.Attributes;
+using System.Text;
 
 namespace Bb.ParrotServices.Controllers
 {
@@ -72,13 +73,13 @@ namespace Bb.ParrotServices.Controllers
             {
                 _contract.Clean();
                 _logger.LogInformation($"{contract} has been failed");
-                return BadRequest(GetModel(ctx.Diagnostics, null));
+                return BadRequest(GetModel(ctx.Diagnostics, null, null));
             }
 
             _builder.RegenerateIndex();
             _logger.LogInformation($"{contract} has been generated");
             var templates = _contract.Templates();
-            return Ok(GetModel(ctx.Diagnostics, templates));
+            return Ok(GetModel(ctx.Diagnostics, templates, _contract.Curls));
         
         }
 
@@ -185,7 +186,7 @@ namespace Bb.ParrotServices.Controllers
 
 
 
-        private ContractModel GetModel(ScriptDiagnostics diagnostics, IEnumerable<string> templates)
+        private ContractModel GetModel(ScriptDiagnostics diagnostics, IEnumerable<string> templates, List<StringBuilder> curls)
         {
 
             var model = new ContractModel();
@@ -199,6 +200,10 @@ namespace Bb.ParrotServices.Controllers
             if (templates != null)
                 foreach (var template in templates)
                     model.Templates.Add(template);
+
+            if (curls != null)
+                foreach (var item in curls)
+                    model.Curls.Add(item.ToString());
 
             return model;
 
