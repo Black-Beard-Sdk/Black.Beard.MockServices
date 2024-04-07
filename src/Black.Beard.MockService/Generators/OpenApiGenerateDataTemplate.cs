@@ -1,6 +1,6 @@
 ﻿
 using Bb.Expressions;
-using Bb.Json.Jslt.Asts;
+using Bb.Jslt.Asts;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Bb.Extensions;

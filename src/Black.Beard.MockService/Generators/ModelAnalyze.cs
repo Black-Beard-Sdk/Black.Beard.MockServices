@@ -1,5 +1,5 @@
 ﻿using Bb.Extensions;
-using Bb.Json.Jslt.Asts;
+using Bb.Jslt.Asts;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Expressions;

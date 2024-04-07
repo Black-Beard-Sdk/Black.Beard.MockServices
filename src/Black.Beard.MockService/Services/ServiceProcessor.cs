@@ -1,6 +1,6 @@
 ﻿using Bb.Analysis.DiagTraces;
 using Bb.Contracts;
-using Bb.Json.Jslt.Services;
+using Bb.Jslt.Services;
 using Oldtonsoft.Json.Linq;
 using System.Text;
 
@@ -12,14 +12,14 @@ namespace Bb.Services.Managers
         static ServiceProcessor()
         {
 
-            Bb.Json.Jslt.Services.VariableResolver.Intercept = VariableInterceptor;
+            //Bb.Jslt.Services.VariableResolver.Intercept = VariableInterceptor;
 
         }
 
-        private static void VariableInterceptor(IVariableResolver resolver, string key, bool status, object valueResolved)
-        {
+        //private static void VariableInterceptor(IVariableResolver resolver, string key, bool status, object valueResolved)
+        //{
 
-        }
+        //}
 
         public ServiceProcessor(string? sourceDirectory = null)
         {
